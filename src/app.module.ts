@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { typeOrmConfig } from './config/typeorm.config';
@@ -13,6 +13,9 @@ import { LaboresFincaModule } from './labores-finca/labores-finca.module';
 import { RegistrosLaborModule } from './registros-labor/registros-labor.module';
 import { UnidadMedidaModule } from './unidades-medida/unidad-medida.module';
 import { ReportesModule } from './reportes/reportes.module';
+import { CorsMiddleware } from './middleware/cors.middleware';
+import { CorsController } from './controllers/cors.controller';
+import { TestController } from './controllers/test.controller';
 
 @Module({
   imports: [
@@ -51,5 +54,11 @@ import { ReportesModule } from './reportes/reportes.module';
     UnidadMedidaModule,
     ReportesModule,
   ],
+  controllers: [CorsController, TestController],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Aplicar el middleware CORS a todas las rutas
+    consumer.apply(CorsMiddleware).forRoutes('*');
+  }
+}
