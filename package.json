@@ -1,7 +1,7 @@
 {
   "name": "bananera-backend",
   "version": "1.0.0",
-  "description": "Backend para sistema de gestión de labores bananeras",
+  "description": "Backend para sistema de gestión de labores agrícolas",
   "author": "",
   "private": true,
   "license": "UNLICENSED",

@@ -8,6 +8,7 @@ export const corsConfig: CorsOptions = {
   origin: [
     'https://reportes-nomina.netlify.app',
     'https://67ec2a1563bc005a820f794f--reportes-nomina.netlify.app',
+    'https://reportes-nomina-backend.onrender.com',
     'http://localhost:4200'
   ],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
