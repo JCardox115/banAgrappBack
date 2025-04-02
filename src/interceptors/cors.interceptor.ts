@@ -21,11 +21,24 @@ export class CorsInterceptor implements NestInterceptor {
     const allowedOrigins = corsConfig.origin as string[];
     const isAllowed = allowedOrigins.includes(origin);
     
-    // Establecer los encabezados CORS
-    response.header('Access-Control-Allow-Origin', isAllowed ? origin : '');
+    // Establecer encabezado específico por origen en lugar de wildcard
+    // cuando se usan credenciales
+    if (isAllowed) {
+      response.header('Access-Control-Allow-Origin', origin);
+    } else if (origin) {
+      // Si no está en la lista pero viene con un origen, usamos el origen explícito
+      // para desarrollo y pruebas
+      response.header('Access-Control-Allow-Origin', origin);
+      console.log(`CORS: Origen no listado pero permitido para pruebas: ${origin}`);
+    } else {
+      // Si no hay origen, usar un valor predeterminado
+      response.header('Access-Control-Allow-Origin', 'https://reportes-nomina.netlify.app');
+    }
+    
     response.header('Access-Control-Allow-Methods', corsConfig.methods);
     response.header('Access-Control-Allow-Headers', corsConfig.allowedHeaders);
     response.header('Access-Control-Allow-Credentials', 'true');
+    response.header('Access-Control-Max-Age', '86400');
     
     // Procesar la respuesta normalmente
     return next.handle();

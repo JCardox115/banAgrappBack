@@ -7,8 +7,32 @@ import { CorsInterceptor } from './interceptors/cors.interceptor';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
-  // Configuración de CORS
-  app.enableCors(corsConfig);
+  // Configuración de CORS - Ajustar para manejo correcto de origenes específicos 
+  // en lugar de wildcard cuando hay credentials
+  app.enableCors({
+    origin: (origin, callback) => {
+      // Permitir solicitudes sin origen (como herramientas y pruebas)
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      
+      // Verificar si el origen está en la lista permitida
+      const allowedOrigins = corsConfig.origin as string[];
+      if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+        // Los orígenes permitidos pueden tener credenciales
+        callback(null, true);
+      } else {
+        // No permitir orígenes no listados en producción
+        callback(new Error('No permitido por CORS'), false);
+      }
+    },
+    methods: corsConfig.methods,
+    credentials: true,
+    allowedHeaders: corsConfig.allowedHeaders,
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+  });
 
   // Registrar interceptor CORS global
   app.useGlobalInterceptors(new CorsInterceptor());
