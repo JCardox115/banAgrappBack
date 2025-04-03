@@ -7,18 +7,14 @@ import { CorsInterceptor } from './interceptors/cors.interceptor';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
-  // Configuración de CORS - Ajustar para manejo correcto de origenes específicos 
-  // en lugar de wildcard cuando hay credentials
+  // Configuración de CORS simplificada para desarrollo
   app.enableCors({
-    origin: [
-      'https://reportes-nomina.netlify.app',
-      'http://localhost:4200'
-    ],
+    origin: '*', // Permitir cualquier origen temporalmente
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+    allowedHeaders: 'Origin,X-Requested-With,Content-Type,Accept,Authorization,ngrok-skip-browser-warning'
   });
-
-  // Registrar interceptor CORS global
+  
+  // No usar el interceptor CORS para evitar conflictos
   // app.useGlobalInterceptors(new CorsInterceptor());
 
   // Configuración de validación global

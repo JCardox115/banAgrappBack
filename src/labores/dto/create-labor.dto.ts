@@ -1,9 +1,6 @@
 import { IsBoolean, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateLaborDto {
-  @IsNotEmpty()
-  @IsString()
-  codigo: string;
 
   @IsNotEmpty()
   @IsString()

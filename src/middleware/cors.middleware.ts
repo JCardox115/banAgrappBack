@@ -12,24 +12,35 @@ export class CorsMiddleware implements NestMiddleware {
     // Obtener el origen de la solicitud
     const origin = req.headers.origin;
     
-    // Verificar si el origen está permitido
-    const allowedOrigins = corsConfig.origin as string[];
-    const isAllowed = allowedOrigins.includes(origin as string);
-    
-    // Si es una solicitud OPTIONS (preflight), responder inmediatamente
+    // Para desarrollo y despliegue temporal, permitir cualquier origen
+    // En producción, se debería limitar a orígenes específicos
     if (req.method === 'OPTIONS') {
       // Configurar los encabezados de respuesta CORS
-      res.header('Access-Control-Allow-Origin', isAllowed ? origin : '');
-      res.header('Access-Control-Allow-Methods', corsConfig.methods);
-      res.header('Access-Control-Allow-Headers', corsConfig.allowedHeaders);
-      res.header('Access-Control-Allow-Credentials', 'true');
+      res.header('Access-Control-Allow-Origin', origin || '*');
+      res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Origin,X-Requested-With,Content-Type,Accept,Authorization,ngrok-skip-browser-warning');
+      
+      // Durante el desarrollo no usamos credenciales para evitar problemas con el wildcard
+      if (origin) {
+        res.header('Access-Control-Allow-Credentials', 'true');
+      }
+      
       res.header('Access-Control-Max-Age', '86400'); // 24 horas
       
       // Enviar respuesta exitosa para solicitudes preflight
       return res.status(204).end();
     }
     
-    // Para solicitudes no-OPTIONS, continuar con el siguiente middleware
+    // Para solicitudes no-OPTIONS
+    // Establecer encabezados CORS para las respuestas normales
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Headers', 'Origin,X-Requested-With,Content-Type,Accept,Authorization,ngrok-skip-browser-warning');
+    
+    if (origin) {
+      res.header('Access-Control-Allow-Credentials', 'true');
+    }
+    
+    // Continuar con el siguiente middleware
     next();
   }
 } 

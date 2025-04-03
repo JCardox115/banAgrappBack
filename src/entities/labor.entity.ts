@@ -9,9 +9,6 @@ export class Labor {
   id: number;
 
   @Column()
-  codigo: string;
-
-  @Column()
   descripcion: string;
 
   @Column({ default: false })

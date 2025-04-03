@@ -12,8 +12,8 @@ export const corsConfig: CorsOptions = {
     'http://localhost:4200'
   ],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-  credentials: true,
-  allowedHeaders: 'Origin,X-Requested-With,Content-Type,Accept,Authorization',
+  credentials: false,
+  allowedHeaders: 'Origin,X-Requested-With,Content-Type,Accept,Authorization,ngrok-skip-browser-warning',
   preflightContinue: false,
   optionsSuccessStatus: 204
 }; 

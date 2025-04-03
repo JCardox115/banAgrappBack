@@ -7,6 +7,9 @@ export class LaborFinca {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ nullable: true })
+  codigo?: string;
+
   @ManyToOne(() => Labor, labor => labor.laboresFinca)
   labor: Labor;
 
