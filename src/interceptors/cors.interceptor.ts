@@ -33,6 +33,13 @@ export class CorsInterceptor implements NestInterceptor {
     } else {
       // Si no hay origen, usar un valor predeterminado
       response.header('Access-Control-Allow-Origin', 'https://reportes-nomina.netlify.app');
+      response.header('Access-Control-Allow-Origin', 'https://reportes-nomina.netlify.app/registro-labor');
+      response.header('Access-Control-Allow-Origin', 'https://reportes-nomina.netlify.app/reportes');
+      response.header('Access-Control-Allow-Origin', 'https://reportes-nomina.netlify.app/auth/login');
+      response.header('Access-Control-Allow-Origin', 'https://reportes-nomina.netlify.app/auth/register');
+      response.header('Access-Control-Allow-Origin', 'https://reportes-nomina.netlify.app/auth/forgot-password');
+      response.header('Access-Control-Allow-Origin', 'https://reportes-nomina.netlify.app/auth/reset-password');
+      response.header('Access-Control-Allow-Origin', 'https://reportes-nomina.netlify.app/auth/verify-email');
     }
     
     response.header('Access-Control-Allow-Methods', corsConfig.methods);
