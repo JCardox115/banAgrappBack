@@ -60,27 +60,27 @@ export class ReportesService {
       
       // Componer la línea según el formato
       const linea = [
-        codigoEmpleado,  // employeeCode
+        codigoEmpleado,// employeeCode
         numeroDocumento, // IdNumber
         nombreCompleto,  // fullName
-        '0',            // NA
-        '0',            // NA
+        '0',          // NA
+        '0',         // NA
         registro.laborFinca.codigo || '',  // labor_code
-        cantidadLabor,  // labor_quantity
-        fechaFormateada,  // labor_creation_date
+        cantidadLabor,// labor_quantity
+        fechaFormateada, // labor_creation_date
         '.',             // NA
         codigoFinca,     // farmCode
         codigoCentroCosto, // c_costo
         '1.00',          // NA
         '9.50',          // NA
-        'L',             // NA
+        'L',          // NA
         codigoLote,      // lote
         cantidadLote,    // cant_lote
-        '0.000',        // precio_lote
-        '3120'          // NA
+        '0.000',       // precio_lote
+        '3120'         // NA
       ].join(',');
       
-      reportContent += linea + '\n';
+      reportContent +=linea+'\n';
     }
 
     return reportContent || 'No hay datos para el reporte en el período seleccionado.';

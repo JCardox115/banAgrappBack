@@ -16,6 +16,7 @@ import { ReportesModule } from './reportes/reportes.module';
 import { CorsMiddleware } from './middleware/cors.middleware';
 import { CorsController } from './controllers/cors.controller';
 import { TestController } from './controllers/test.controller';
+import { UsuariosModule } from './usuarios/usuarios.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { TestController } from './controllers/test.controller';
     RegistrosLaborModule,
     UnidadMedidaModule,
     ReportesModule,
+    UsuariosModule
   ],
   controllers: [CorsController, TestController],
 })
