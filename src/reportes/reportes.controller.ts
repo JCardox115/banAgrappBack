@@ -8,12 +8,13 @@ export class ReportesController {
 
   @Post('generate-txt')
   async generateTxtReport(
-    @Body() reportData: { fincaId: number; fechaDesde: string; fechaHasta: string },
+    @Body() reportData: { empleado:string; fincaId: number; fechaDesde: string; fechaHasta: string },
     @Res() res: Response,
   ) {
     try {
-      const { fincaId, fechaDesde, fechaHasta } = reportData;
+      const { empleado, fincaId, fechaDesde, fechaHasta } = reportData;
       const reportContent = await this.reportesService.generateTxtReport(
+        empleado,
         fincaId,
         fechaDesde,
         fechaHasta,
