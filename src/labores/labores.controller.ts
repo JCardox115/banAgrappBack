@@ -19,6 +19,11 @@ export class LaboresController {
     return this.laboresService.findAll();
   }
 
+  @Get('grupo/:grupoId')
+  findByGrupo(@Param('grupoId') grupoId: number) {
+    return this.laboresService.findByGrupo(grupoId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.laboresService.findOne(id);

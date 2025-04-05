@@ -9,22 +9,27 @@ import { UpdateLaborDto } from './dto/update-labor.dto';
 export class LaboresService {
   constructor(
     @InjectRepository(Labor)
-    private laborRepository: Repository<Labor>,
+    private laboresRepository: Repository<Labor>,
   ) {}
 
   async findAll(): Promise<Labor[]> {
-    const query = this.laborRepository.createQueryBuilder('labor');
-    query.where('labor.activo = :activo', { activo: true });
-    query.leftJoinAndSelect('labor.unidadMedida', 'unidadMedida');
-    query.leftJoinAndSelect('labor.lugarEjecucion', 'lugarEjecucion');
-    
-    return query.getMany();
+    return this.laboresRepository.find({
+      where: { activo: true },
+      relations: ['grupoLabor', 'unidadMedida', 'lugarEjecucion']
+    });
+  }
+
+  async findByGrupo(grupoId: number): Promise<Labor[]> {
+    return this.laboresRepository.find({
+      where: { grupoLabor: { id: grupoId }, activo: true },
+      relations: ['grupoLabor', 'unidadMedida', 'lugarEjecucion']
+    });
   }
 
   async findOne(id: number): Promise<Labor> {
-    const labor = await this.laborRepository.findOne({ 
+    const labor = await this.laboresRepository.findOne({
       where: { id },
-      relations: ['unidadMedida', 'lugarEjecucion'] 
+      relations: ['grupoLabor', 'unidadMedida', 'lugarEjecucion']
     });
     
     if (!labor) {
@@ -35,19 +40,30 @@ export class LaboresService {
   }
 
   async create(createLaborDto: CreateLaborDto): Promise<Labor> {
-    const { unidadMedidaId, lugarEjecucionId, ...laborData } = createLaborDto;
+    const { 
+      grupoLaborId, 
+      unidadMedidaId, 
+      lugarEjecucionId, 
+      ...laborData 
+    } = createLaborDto;
     
-    const labor = this.laborRepository.create({
+    const labor = this.laboresRepository.create({
       ...laborData,
+      grupoLabor: { id: grupoLaborId },
       unidadMedida: { id: unidadMedidaId },
       lugarEjecucion: { id: lugarEjecucionId }
     });
     
-    return this.laborRepository.save(labor);
+    return this.laboresRepository.save(labor);
   }
 
   async update(id: number, updateLaborDto: UpdateLaborDto): Promise<Labor> {
     const labor = await this.findOne(id);
+    
+    if (updateLaborDto.grupoLaborId) {
+      labor.grupoLabor = { id: updateLaborDto.grupoLaborId } as any;
+      delete updateLaborDto.grupoLaborId;
+    }
     
     if (updateLaborDto.unidadMedidaId) {
       labor.unidadMedida = { id: updateLaborDto.unidadMedidaId } as any;
@@ -61,12 +77,12 @@ export class LaboresService {
     
     Object.assign(labor, updateLaborDto);
     
-    return this.laborRepository.save(labor);
+    return this.laboresRepository.save(labor);
   }
 
   async remove(id: number): Promise<void> {
     const labor = await this.findOne(id);
     labor.activo = false;
-    await this.laborRepository.save(labor);
+    await this.laboresRepository.save(labor);
   }
 } 

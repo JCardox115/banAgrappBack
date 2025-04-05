@@ -16,7 +16,7 @@ export class LaboresFincaService {
     const query = this.laborFincaRepository.createQueryBuilder('laborFinca');
     query.leftJoinAndSelect('laborFinca.labor', 'labor');
     query.leftJoinAndSelect('laborFinca.finca', 'finca');
-    query.leftJoinAndSelect('labor.unidadMedida', 'unidadMedida');
+    query.leftJoinAndSelect('labor.grupoLabor', 'grupoLabor');
     query.where('laborFinca.activo = :activo', { activo: true });
     
     if (fincaId) {
@@ -29,7 +29,7 @@ export class LaboresFincaService {
   async findOne(id: number): Promise<LaborFinca> {
     const laborFinca = await this.laborFincaRepository.findOne({ 
       where: { id }, 
-      relations: ['labor', 'finca', 'labor.unidadMedida'] 
+      relations: ['labor', 'finca', 'labor.grupoLabor'] 
     });
     if (!laborFinca) {
       throw new NotFoundException(`LaborFinca con ID ${id} no encontrada`);

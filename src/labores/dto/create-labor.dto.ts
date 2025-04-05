@@ -1,48 +1,43 @@
-import { IsBoolean, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsBoolean, IsNumber } from 'class-validator';
 
 export class CreateLaborDto {
+  @IsOptional()
+  @IsNumber()
+  id?: number;
+  
+  @IsNotEmpty()
+  @IsString()
+  codigo: string;
 
   @IsNotEmpty()
   @IsString()
   descripcion: string;
 
-  @IsOptional()
-  @IsBoolean()
-  variable?: boolean;
+  @IsNotEmpty()
+  @IsNumber()
+  grupoLaborId: number;
+
+  @IsNotEmpty()
+  @IsString()
+  variable: string;
 
   @IsNotEmpty()
   @IsNumber()
   unidadMedidaId: number;
+
+  @IsOptional()
+  @IsBoolean()
+  laborPrincipal?: boolean;
+
+  @IsNotEmpty()
+  @IsNumber()
+  precio: number;
 
   @IsNotEmpty()
   @IsNumber()
   lugarEjecucionId: number;
 
   @IsOptional()
-  @IsNumber()
-  numVueltasSemanales?: number;
-
-  @IsNotEmpty()
-  @IsString()
-  zona: string;
-
-  @IsNotEmpty()
-  @IsString()
-  descZona: string;
-
-  @IsNotEmpty()
-  @IsDateString()
-  fechaVigencia: string;
-
-  @IsNotEmpty()
-  @IsNumber()
-  precio: number;
-
-  @IsOptional()
   @IsBoolean()
-  enBloque?: boolean;
-
-  @IsOptional()
-  @IsBoolean()
-  aplicaRecargo?: boolean;
+  activo?: boolean;
 } 

@@ -2,6 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, CreateDat
 import { LaborFinca } from './labor-finca.entity';
 import { UnidadMedida } from './unidad-medida.entity';
 import { LugarEjecucion } from './lugar-ejecucion.entity';
+import { GrupoLabor } from './grupo-labor.entity';
 
 @Entity('labores')
 export class Labor {
@@ -9,37 +10,28 @@ export class Labor {
   id: number;
 
   @Column()
+  codigo: string;
+
+  @Column()
   descripcion: string;
 
-  @Column({ default: false })
-  variable: boolean;
+  @ManyToOne(() => GrupoLabor, grupoLabor => grupoLabor.labores)
+  grupoLabor: GrupoLabor;
+
+  @Column()
+  variable: string;
 
   @ManyToOne(() => UnidadMedida)
   unidadMedida: UnidadMedida;
 
-  @ManyToOne(() => LugarEjecucion)
-  lugarEjecucion: LugarEjecucion;
-
-  @Column({ nullable: true })
-  numVueltasSemanales: number;
-
-  @Column()
-  zona: string;
-
-  @Column()
-  descZona: string;
-
-  @Column({ type: 'date' })
-  fechaVigencia: Date;
+  @Column({ default: false })
+  laborPrincipal: boolean;
 
   @Column('decimal', { precision: 10, scale: 2 })
   precio: number;
 
-  @Column({ default: false })
-  enBloque: boolean;
-
-  @Column({ default: false })
-  aplicaRecargo: boolean;
+  @ManyToOne(() => LugarEjecucion)
+  lugarEjecucion: LugarEjecucion;
 
   @OneToMany(() => LaborFinca, laborFinca => laborFinca.labor)
   laboresFinca: LaborFinca[];

@@ -7,9 +7,6 @@ export class LaborFinca {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true })
-  codigo?: string;
-
   @ManyToOne(() => Labor, labor => labor.laboresFinca)
   labor: Labor;
 
@@ -17,7 +14,7 @@ export class LaborFinca {
   finca: Finca;
 
   @Column('decimal', { precision: 10, scale: 2 })
-  precioEspecifico: number;
+  precio: number;
 
   @Column({ default: true })
   activo: boolean;

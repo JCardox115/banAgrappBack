@@ -73,7 +73,7 @@ export class ReportesService {
         nombreCompleto,        // fullName
         '0',                   // NA
         '0',                   // NA
-        registro.laborFinca.codigo || '',  // labor_code
+        registro.laborFinca.labor.codigo || '',  // labor_code
         cantidadLabor,         // labor_quantity
         fechaFormateada,       // labor_creation_date
         '.',                   // NA
