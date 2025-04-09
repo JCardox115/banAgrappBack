@@ -5,10 +5,15 @@ import { Lote } from '../entities/lote.entity';
 import { CentroCosto } from '../entities/centro-costo.entity';
 import { Empleado } from '../entities/empleado.entity';
 import { Labor } from '../entities/labor.entity';
-import { LaborFinca } from '../entities/labor-finca.entity';
 import { UnidadMedida } from '../entities/unidad-medida.entity';
 import { RegistroLabor } from '../entities/registro-labor.entity';
 import { LugarEjecucion } from 'src/entities/lugar-ejecucion.entity';
+import { TipoSuelo } from 'src/entities/tipo-suelo.entity';
+import { LaborGrupoLabor } from 'src/entities/labor-grupo-labor.entity';
+import { Grupo } from 'src/entities/grupo.entity';
+import { ConceptoPagoLaborGrupoLabor } from 'src/entities/concepto-pago-labor-grupo-labor.entity';
+import { ConceptoPago } from 'src/entities/concepto-pago.entity';
+
 
 export const typeOrmConfig: TypeOrmModuleOptions = {
   type: 'postgres',
@@ -23,12 +28,17 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
     Lote,
     CentroCosto,
     Empleado,
+    Grupo,
     Labor,
-    LaborFinca,
+    LaborGrupoLabor,
+    ConceptoPago,
+    ConceptoPagoLaborGrupoLabor,
     UnidadMedida,
     RegistroLabor,
-    LugarEjecucion
+    LugarEjecucion,
+    TipoSuelo,
   ],
+  migrations: ["src/migrations/*.ts"],
   synchronize: process.env.NODE_ENV !== 'production', // Solo para desarrollo
   logging: process.env.NODE_ENV !== 'production',
   ssl: false, // Deshabilitar SSL explícitamente

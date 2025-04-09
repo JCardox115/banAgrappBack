@@ -7,7 +7,7 @@ export class CreateRegistroLaborDto {
 
   @IsNotEmpty()
   @IsNumber()
-  laborFincaId: number;
+  conceptoPagoLaborGrupoLaborId: number;
 
   @IsNotEmpty()
   @IsNumber()

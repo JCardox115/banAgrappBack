@@ -1,6 +1,6 @@
-import { IsNotEmpty, IsString, IsOptional, IsBoolean, IsNumber } from 'class-validator';
-
-export class CreateGrupoLaborDto {
+import { IsNotEmpty, IsString, IsOptional, IsBoolean, IsNumber, IsDate } from 'class-validator';
+  
+export class CreateGrupoDto {
   @IsOptional()
   @IsNumber()
   id?: number;
@@ -16,6 +16,14 @@ export class CreateGrupoLaborDto {
   @IsNotEmpty()
   @IsNumber()
   fincaId: number;
+
+  @IsOptional()
+  @IsString()
+  creationDate: string;
+
+  @IsOptional()
+  @IsString()
+  dateUpdate: string;
 
   @IsOptional()
   @IsBoolean()

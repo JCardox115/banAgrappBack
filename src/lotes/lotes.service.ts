@@ -9,7 +9,7 @@ import { UpdateLoteDto } from './dto/update-lote.dto';
 export class LotesService {
   constructor(
     @InjectRepository(Lote)
-    private loteRepository: Repository<Lote>,
+    private readonly loteRepository: Repository<Lote>,
   ) {}
 
   async findAll(fincaId?: number): Promise<Lote[]> {
@@ -56,5 +56,12 @@ export class LotesService {
     const lote = await this.findOne(id);
     lote.activo = false;
     await this.loteRepository.save(lote);
+  }
+
+  findByFinca(fincaId: number) {
+    return this.loteRepository.find({
+      where: { fincaId },
+      relations: ['finca', 'tipoSuelo']
+    });
   }
 } 

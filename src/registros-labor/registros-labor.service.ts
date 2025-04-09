@@ -15,11 +15,11 @@ export class RegistrosLaborService {
   async findAll(fincaId?: number): Promise<RegistroLabor[]> {
     const query = this.registroRepository.createQueryBuilder('registro');
     query.leftJoinAndSelect('registro.empleado', 'empleado');
-    query.leftJoinAndSelect('registro.laborFinca', 'laborFinca');
+    query.leftJoinAndSelect('registro.conceptoPagoLaborGrupoLabor', 'conceptoPagoLaborGrupoLabor');
     query.leftJoinAndSelect('registro.centroCosto', 'centroCosto');
     query.leftJoinAndSelect('registro.lote', 'lote');
-    query.leftJoinAndSelect('laborFinca.labor', 'labor');
-    query.leftJoinAndSelect('laborFinca.finca', 'finca');
+    query.leftJoinAndSelect('conceptoPagoLaborGrupoLabor.labor', 'labor');
+    query.leftJoinAndSelect('conceptoPagoLaborGrupoLabor.finca', 'finca');
     query.leftJoinAndSelect('labor.unidadMedida', 'unidadMedida');
     
     if (fincaId) {
@@ -36,12 +36,12 @@ export class RegistrosLaborService {
       where: { id },
       relations: [
         'empleado', 
-        'laborFinca', 
+        'conceptoPagoLaborGrupoLabor', 
         'centroCosto', 
         'lote', 
-        'laborFinca.labor', 
-        'laborFinca.finca',
-        'laborFinca.labor.unidadMedida'
+        'conceptoPagoLaborGrupoLabor.labor', 
+        'conceptoPagoLaborGrupoLabor.finca',
+        'conceptoPagoLaborGrupoLabor.labor.unidadMedida'
       ] 
     });
     
@@ -55,7 +55,7 @@ export class RegistrosLaborService {
   async create(createRegistroLaborDto: CreateRegistroLaborDto): Promise<RegistroLabor> {
     const { 
       empleadoId, 
-      laborFincaId, 
+      conceptoPagoLaborGrupoLaborId, 
       centroCostoId, 
       loteId, 
       ...registroData 
@@ -68,7 +68,7 @@ export class RegistrosLaborService {
       ...registroData,
       total,
       empleado: { id: empleadoId },
-      laborFinca: { id: laborFincaId },
+      conceptoPagoLaborGrupoLabor: { id: conceptoPagoLaborGrupoLaborId },
       centroCosto: { id: centroCostoId },
       ...(loteId ? { lote: { id: loteId } } : {})
     });
@@ -80,7 +80,7 @@ export class RegistrosLaborService {
     const registrosToSave = registrosDto.map(dto => {
       const { 
         empleadoId, 
-        laborFincaId, 
+        conceptoPagoLaborGrupoLaborId, 
         centroCostoId, 
         loteId, 
         ...registroData 
@@ -93,7 +93,7 @@ export class RegistrosLaborService {
         ...registroData,
         total,
         empleado: { id: empleadoId },
-        laborFinca: { id: laborFincaId },
+        conceptoPagoLaborGrupoLabor: { id: conceptoPagoLaborGrupoLaborId },
         centroCosto: { id: centroCostoId },
         ...(loteId ? { lote: { id: loteId } } : {})
       });
@@ -107,9 +107,9 @@ export class RegistrosLaborService {
     
     const { 
       empleadoId, 
-      laborFincaId, 
+      conceptoPagoLaborGrupoLaborId, 
       centroCostoId, 
-      loteId, 
+      loteId,
       ...registroData 
     } = updateRegistroLaborDto;
     
@@ -117,8 +117,8 @@ export class RegistrosLaborService {
       registro.empleado = { id: empleadoId } as any;
     }
     
-    if (laborFincaId) {
-      registro.laborFinca = { id: laborFincaId } as any;
+    if (conceptoPagoLaborGrupoLaborId) {
+      registro.conceptoPagoLaborGrupoLabor = { id: conceptoPagoLaborGrupoLaborId } as any;
     }
     
     if (centroCostoId) {

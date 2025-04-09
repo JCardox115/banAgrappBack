@@ -1,18 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { GrupoLabor } from '../entities/grupo-labor.entity';
-import { CreateGrupoLaborDto } from './dto/create-grupo-labor.dto';
-import { UpdateGrupoLaborDto } from './dto/update-grupo-labor.dto';
+import { Grupo } from '../entities/grupo.entity';
+import { CreateGrupoDto } from './dto/create-grupo.dto';
+import { UpdateGrupoDto } from './dto/update-grupo.dto';
 
 @Injectable()
 export class GruposLaborService {
   constructor(
-    @InjectRepository(GrupoLabor)
-    private grupoLaborRepository: Repository<GrupoLabor>,
+    @InjectRepository(Grupo)
+    private grupoLaborRepository: Repository<Grupo>,
   ) {}
 
-  async findAll(fincaId?: number): Promise<GrupoLabor[]> {
+  async findAll(fincaId?: number): Promise<Grupo[]> {
     const query = this.grupoLaborRepository.createQueryBuilder('grupoLabor');
     query.leftJoinAndSelect('grupoLabor.finca', 'finca');
     query.where('grupoLabor.activo = :activo', { activo: true });
@@ -24,7 +24,7 @@ export class GruposLaborService {
     return query.getMany();
   }
 
-  async findOne(id: number): Promise<GrupoLabor> {
+  async findOne(id: number): Promise<Grupo> {
     const grupoLabor = await this.grupoLaborRepository.findOne({ 
       where: { id }, 
       relations: ['finca'] 
@@ -35,7 +35,7 @@ export class GruposLaborService {
     return grupoLabor;
   }
 
-  async create(createGrupoLaborDto: CreateGrupoLaborDto): Promise<GrupoLabor> {
+  async create(createGrupoLaborDto: CreateGrupoDto): Promise<Grupo> {
     const { fincaId, ...grupoLaborData } = createGrupoLaborDto;
     
     const grupoLabor = this.grupoLaborRepository.create({
@@ -46,7 +46,7 @@ export class GruposLaborService {
     return this.grupoLaborRepository.save(grupoLabor);
   }
 
-  async update(id: number, updateGrupoLaborDto: UpdateGrupoLaborDto): Promise<GrupoLabor> {
+  async update(id: number, updateGrupoLaborDto: UpdateGrupoDto): Promise<Grupo> {
     const grupoLabor = await this.findOne(id);
     
     if (updateGrupoLaborDto.fincaId) {

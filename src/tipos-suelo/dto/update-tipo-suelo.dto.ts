@@ -1,8 +1,8 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CreateLoteDto } from './create-lote.dto';
+import { CreateTipoSueloDto } from './create-tipo-suelo.dto';
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class UpdateLoteDto extends PartialType(CreateLoteDto) {
+export class UpdateTipoSueloDto extends PartialType(CreateTipoSueloDto) {
   @IsNumber()
   @IsNotEmpty()
   id: number;

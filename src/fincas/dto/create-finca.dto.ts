@@ -1,11 +1,7 @@
 // backend/src/fincas/dto/create-finca.dto.ts
-import { IsNotEmpty, IsString, IsBoolean, MaxLength, IsOptional, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsString, IsBoolean, MaxLength, IsOptional, IsDate } from 'class-validator';
 
 export class CreateFincaDto {
-  @IsOptional()
-  @IsNumber()
-  id?: number;
-
   @IsNotEmpty()
   @IsString()
   @MaxLength(20)
@@ -16,6 +12,7 @@ export class CreateFincaDto {
   @MaxLength(100)
   descripcion: string;
 
+  @IsOptional()
   @IsBoolean()
-  activo?: boolean; // Este campo puede ser opcional
+  activo?: boolean;
 }

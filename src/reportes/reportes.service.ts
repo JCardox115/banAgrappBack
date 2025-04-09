@@ -54,11 +54,11 @@ export class ReportesService {
       const cantidadLabor = typeof registro.cantidad === 'number' 
         ? parseFloat(registro.cantidad.toString()).toFixed(5) 
         : '0.00000';
-      const codigoFinca = registro.laborFinca.finca.codigo || '';
+      const codigoFinca = registro.conceptoPagoLaborGrupoLabor.laborGrupoLabor.grupoLabor.finca.codigo || '';
       const codigoCentroCosto = registro.centroCosto.codigo || '';
       
       // Información del lote (si existe)
-      const codigoLote = registro.lote ? registro.lote.codigo : '';
+      const codigoLote = registro.lote ? registro.lote.numLote : '';
       const cantidadLote = registro.cantidadLote && typeof registro.cantidadLote === 'number'
         ? parseFloat(registro.cantidadLote.toString()).toFixed(5) 
         : '0.00000';
@@ -73,7 +73,7 @@ export class ReportesService {
         nombreCompleto,        // fullName
         '0',                   // NA
         '0',                   // NA
-        registro.laborFinca.labor.codigo || '',  // labor_code
+        registro.conceptoPagoLaborGrupoLabor.laborGrupoLabor.labor.codigo || '',  // labor_code
         cantidadLabor,         // labor_quantity
         fechaFormateada,       // labor_creation_date
         '.',                   // NA

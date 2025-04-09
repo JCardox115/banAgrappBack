@@ -5,5 +5,5 @@ import { IsNotEmpty, IsNumber } from 'class-validator';
 export class UpdateFincaDto extends PartialType(CreateFincaDto) {
     @IsNumber()
     @IsNotEmpty()
-    id?: number;
+    id: number;
 }

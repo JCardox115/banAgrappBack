@@ -1,17 +1,18 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Lote } from './lote.entity';
 import { CentroCosto } from './centro-costo.entity';
-import { LaborFinca } from './labor-finca.entity';
+import { IsOptional } from 'class-validator';
+import { Grupo} from './grupo.entity';
 
 @Entity('fincas')
 export class Finca {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ length: 20, nullable: true })
   codigo: string;
 
-  @Column()
+  @Column({ length: 100, nullable: true })
   descripcion: string;
 
   @Column({ default: true })
@@ -23,12 +24,14 @@ export class Finca {
   @OneToMany(() => CentroCosto, centroCosto => centroCosto.finca)
   centrosCosto: CentroCosto[];
 
-  @OneToMany(() => LaborFinca, laborFinca => laborFinca.finca)
-  laboresFinca: LaborFinca[];
+  @OneToMany(() => Grupo, grupo => grupo.finca)
+  grupos: Grupo[];
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @IsOptional()
+  @CreateDateColumn({ name: 'creationDate' })
+  creationDate: Date;
+  
+  @IsOptional()
+  @UpdateDateColumn({ name: 'updateDate' })
+  updateDate: Date;
 } 

@@ -15,22 +15,19 @@ export class LaboresService {
   async findAll(): Promise<Labor[]> {
     return this.laboresRepository.find({
       where: { activo: true },
-      relations: ['grupoLabor', 'unidadMedida', 'lugarEjecucion']
+      relations: ['lugarEjecucion']
     });
   }
 
   async findByGrupo(grupoId: number): Promise<Labor[]> {
     return this.laboresRepository.find({
-      where: { grupoLabor: { id: grupoId }, activo: true },
+      // where: { grupoLabor: { id: grupoId }, activo: true },
       relations: ['grupoLabor', 'unidadMedida', 'lugarEjecucion']
     });
   }
 
   async findOne(id: number): Promise<Labor> {
-    const labor = await this.laboresRepository.findOne({
-      where: { id },
-      relations: ['grupoLabor', 'unidadMedida', 'lugarEjecucion']
-    });
+    const labor = await this.laboresRepository.findOneBy({ id });
     
     if (!labor) {
       throw new NotFoundException(`Labor con ID ${id} no encontrada`);
@@ -41,16 +38,12 @@ export class LaboresService {
 
   async create(createLaborDto: CreateLaborDto): Promise<Labor> {
     const { 
-      grupoLaborId, 
-      unidadMedidaId, 
       lugarEjecucionId, 
       ...laborData 
     } = createLaborDto;
     
     const labor = this.laboresRepository.create({
       ...laborData,
-      grupoLabor: { id: grupoLaborId },
-      unidadMedida: { id: unidadMedidaId },
       lugarEjecucion: { id: lugarEjecucionId }
     });
     
@@ -60,15 +53,6 @@ export class LaboresService {
   async update(id: number, updateLaborDto: UpdateLaborDto): Promise<Labor> {
     const labor = await this.findOne(id);
     
-    if (updateLaborDto.grupoLaborId) {
-      labor.grupoLabor = { id: updateLaborDto.grupoLaborId } as any;
-      delete updateLaborDto.grupoLaborId;
-    }
-    
-    if (updateLaborDto.unidadMedidaId) {
-      labor.unidadMedida = { id: updateLaborDto.unidadMedidaId } as any;
-      delete updateLaborDto.unidadMedidaId;
-    }
     
     if (updateLaborDto.lugarEjecucionId) {
       labor.lugarEjecucion = { id: updateLaborDto.lugarEjecucionId } as any;

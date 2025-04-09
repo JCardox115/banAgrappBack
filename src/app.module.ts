@@ -9,7 +9,6 @@ import { EmpleadosModule } from './empleados/empleados.module';
 import { LotesModule } from './lotes/lotes.module';
 import { LaboresModule } from './labores/labores.module';
 import { LugaresEjecucionModule } from './lugares-ejecucion/lugares-ejecucion.module';
-import { LaboresFincaModule } from './labores-finca/labores-finca.module';
 import { RegistrosLaborModule } from './registros-labor/registros-labor.module';
 import { UnidadMedidaModule } from './unidades-medida/unidad-medida.module';
 import { ReportesModule } from './reportes/reportes.module';
@@ -17,7 +16,11 @@ import { CorsMiddleware } from './middleware/cors.middleware';
 import { CorsController } from './controllers/cors.controller';
 import { TestController } from './controllers/test.controller';
 import { UsuariosModule } from './usuarios/usuarios.module';
-import { GruposLaborModule } from './grupos-labor/grupos-labor.module';
+import { GruposLaborModule } from './grupos/grupos.module';
+import { TiposSueloModule } from './tipos-suelo/tipos-suelo.module';
+import { LaborGrupoLaborModule } from './labor-grupo-labor/labor-grupo-labor.module';
+import { ConceptosPagoModule } from './conceptos-pago/conceptos-pago.module';
+import { ConceptoPagoLaborGrupoLaborModule } from './concepto-pago-labor-grupo-labor/concepto-pago-labor-grupo-labor.module';
 
 @Module({
   imports: [
@@ -51,12 +54,15 @@ import { GruposLaborModule } from './grupos-labor/grupos-labor.module';
     LotesModule,
     LaboresModule,
     LugaresEjecucionModule,
-    LaboresFincaModule,
     RegistrosLaborModule,
     UnidadMedidaModule,
     ReportesModule,
     UsuariosModule,
-    GruposLaborModule
+    GruposLaborModule,
+    TiposSueloModule,
+    LaborGrupoLaborModule,
+    ConceptosPagoModule,
+    ConceptoPagoLaborGrupoLaborModule
   ],
   controllers: [CorsController, TestController],
 })

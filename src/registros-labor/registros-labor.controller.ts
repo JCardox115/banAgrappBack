@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Put } from '@nestjs/common';
 import { RegistrosLaborService } from './registros-labor.service';
 import { CreateRegistroLaborDto } from './dto/create-registro-labor.dto';
 import { UpdateRegistroLaborDto } from './dto/update-registro-labor.dto';
@@ -31,6 +31,11 @@ export class RegistrosLaborController {
 
   @Patch(':id')
   update(@Param('id') id: number, @Body() updateRegistroLaborDto: UpdateRegistroLaborDto) {
+    return this.registrosLaborService.update(id, updateRegistroLaborDto);
+  }
+
+  @Put(':id')
+  updatePut(@Param('id') id: number, @Body() updateRegistroLaborDto: UpdateRegistroLaborDto) {
     return this.registrosLaborService.update(id, updateRegistroLaborDto);
   }
 

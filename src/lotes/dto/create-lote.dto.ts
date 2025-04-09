@@ -1,31 +1,23 @@
-import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsOptional, MaxLength } from 'class-validator';
 
 export class CreateLoteDto {
-  @IsOptional()
-  @IsNumber()
-  id?: number;
-
-  @IsNotEmpty()
   @IsString()
-  codigo: string;
-
   @IsNotEmpty()
-  @IsString()
-  descripcion: string;
+  @MaxLength(20)
+  numLote: string;
 
-  @IsNotEmpty()
   @IsNumber()
+  @IsNotEmpty()
   fincaId: number;
 
-  @IsNotEmpty()
   @IsNumber()
+  @IsNotEmpty()
+  tipoSueloId: number;
+
+  @IsNumber()
+  @IsNotEmpty()
   hectareasNetas: number;
 
   @IsOptional()
-  @IsNumber()
-  tipoSueloId?: number;
-
-  @IsOptional()
-  @IsBoolean()
   activo?: boolean;
 } 

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put } from '@nestjs/common';
 import { LugaresEjecucionService } from './lugares-ejecucion.service';
 import { CreateLugarEjecucionDto } from './dto/create-lugar-ejecucion.dto';
 import { UpdateLugarEjecucionDto } from './dto/update-lugar-ejecucion.dto';
@@ -26,6 +26,11 @@ export class LugaresEjecucionController {
 
   @Patch(':id')
   update(@Param('id') id: number, @Body() updateLugarEjecucionDto: UpdateLugarEjecucionDto) {
+    return this.lugaresEjecucionService.update(id, updateLugarEjecucionDto);
+  }
+
+  @Put(':id')
+  updatePut(@Param('id') id: number, @Body() updateLugarEjecucionDto: UpdateLugarEjecucionDto) {
     return this.lugaresEjecucionService.update(id, updateLugarEjecucionDto);
   }
 

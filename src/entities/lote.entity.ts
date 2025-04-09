@@ -1,29 +1,39 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn, JoinColumn } from 'typeorm';
 import { Finca } from './finca.entity';
+import { TipoSuelo } from './tipo-suelo.entity';
+import { IsOptional } from 'class-validator';
 
 @Entity('lotes')
 export class Lote {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  codigo: string;
+  @Column({ length: 20, name: 'num_lote', nullable: false })
+  numLote: string;
 
-  @Column()
-  descripcion: string;
+  @Column({ name: 'finca_id', nullable: false })
+  fincaId: number;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column({ name: 'tipo_suelo_id', nullable: false })
+  tipoSueloId: number;
+
+  @Column({ name: 'hectareas_netas', type: 'decimal', precision: 10, scale: 2, nullable: false })
   hectareasNetas: number;
 
   @Column({ default: true })
   activo: boolean;
 
+  @CreateDateColumn({ name: 'creation_date' })
+  creationDate: Date;
+
+  @UpdateDateColumn({ name: 'update_date' })
+  updateDate: Date;
+
   @ManyToOne(() => Finca, finca => finca.lotes)
+  @JoinColumn({ name: 'finca_id' })
   finca: Finca;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @ManyToOne(() => TipoSuelo)
+  @JoinColumn({ name: 'tipo_suelo_id' })
+  tipoSuelo: TipoSuelo;
 } 

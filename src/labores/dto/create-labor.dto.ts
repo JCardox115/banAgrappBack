@@ -13,25 +13,9 @@ export class CreateLaborDto {
   @IsString()
   descripcion: string;
 
-  @IsNotEmpty()
-  @IsNumber()
-  grupoLaborId: number;
-
-  @IsNotEmpty()
-  @IsString()
-  variable: string;
-
-  @IsNotEmpty()
-  @IsNumber()
-  unidadMedidaId: number;
-
   @IsOptional()
   @IsBoolean()
   laborPrincipal?: boolean;
-
-  @IsNotEmpty()
-  @IsNumber()
-  precio: number;
 
   @IsNotEmpty()
   @IsNumber()

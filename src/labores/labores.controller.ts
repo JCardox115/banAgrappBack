@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put, ParseIntPipe } from '@nestjs/common';
 import { LaboresService } from './labores.service';
 import { CreateLaborDto } from './dto/create-labor.dto';
 import { UpdateLaborDto } from './dto/update-labor.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Labor } from 'src/entities/labor.entity';
 
 @Controller('labores')
 @UseGuards(JwtAuthGuard)
@@ -25,12 +26,17 @@ export class LaboresController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number) {
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<Labor> {
     return this.laboresService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: number, @Body() updateLaborDto: UpdateLaborDto) {
+    return this.laboresService.update(id, updateLaborDto);
+  }
+
+  @Put(':id')
+  updatePut(@Param('id') id: number, @Body() updateLaborDto: UpdateLaborDto) {
     return this.laboresService.update(id, updateLaborDto);
   }
 

@@ -1,18 +1,16 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put } from '@nestjs/common';
 import { FincasService } from './fincas.service';
 import { CreateFincaDto } from './dto/create-finca.dto';
 import { UpdateFincaDto } from './dto/update-finca.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+
 
 @Controller('fincas')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard)
 export class FincasController {
   constructor(private readonly fincasService: FincasService) {}
 
   @Post()
-  @Roles('admin')
   create(@Body() createFincaDto: CreateFincaDto) {
     return this.fincasService.create(createFincaDto);
   }
@@ -27,14 +25,17 @@ export class FincasController {
     return this.fincasService.findOne(+id);
   }
 
-  @Put(':id')
-  @Roles('admin')
+  @Patch(':id')
   update(@Param('id') id: string, @Body() updateFincaDto: UpdateFincaDto) {
     return this.fincasService.update(+id, updateFincaDto);
   }
 
+  @Put(':id')
+  updatePut(@Param('id') id: string, @Body() updateFincaDto: UpdateFincaDto) {
+    return this.fincasService.update(+id, updateFincaDto);
+  }
+
   @Delete(':id')
-  @Roles('admin')
   remove(@Param('id') id: string) {
     return this.fincasService.remove(+id);
   }

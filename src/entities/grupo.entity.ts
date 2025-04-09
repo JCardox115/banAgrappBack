@@ -2,8 +2,8 @@ import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany, CreateDat
 import { Finca } from './finca.entity';
 import { Labor } from './labor.entity';
 
-@Entity('grupos_labor')
-export class GrupoLabor {
+@Entity('grupos')
+export class Grupo {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -13,18 +13,18 @@ export class GrupoLabor {
   @Column()
   descripcion: string;
 
+  @Column()
+  fincaId: number;
+
   @ManyToOne(() => Finca)
   finca: Finca;
-
-  @OneToMany(() => Labor, labor => labor.grupoLabor)
-  labores: Labor[];
 
   @Column({ default: true })
   activo: boolean;
 
   @CreateDateColumn()
-  createdAt: Date;
+  creationDate: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  dateUpdate: Date;
 } 

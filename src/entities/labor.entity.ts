@@ -1,8 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { LaborFinca } from './labor-finca.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { UnidadMedida } from './unidad-medida.entity';
 import { LugarEjecucion } from './lugar-ejecucion.entity';
-import { GrupoLabor } from './grupo-labor.entity';
+import { IsOptional } from 'class-validator';
 
 @Entity('labores')
 export class Labor {
@@ -15,33 +14,32 @@ export class Labor {
   @Column()
   descripcion: string;
 
-  @ManyToOne(() => GrupoLabor, grupoLabor => grupoLabor.labores)
-  grupoLabor: GrupoLabor;
-
-  @Column()
-  variable: string;
-
-  @ManyToOne(() => UnidadMedida)
-  unidadMedida: UnidadMedida;
-
   @Column({ default: false })
   laborPrincipal: boolean;
-
-  @Column('decimal', { precision: 10, scale: 2 })
-  precio: number;
 
   @ManyToOne(() => LugarEjecucion)
   lugarEjecucion: LugarEjecucion;
 
-  @OneToMany(() => LaborFinca, laborFinca => laborFinca.labor)
-  laboresFinca: LaborFinca[];
+  @Column({ default: false })
+  rendimientoCalculado: boolean;
+
+  @Column({ nullable: true })
+  @IsOptional()
+  rendimientoEstandar: number;
+
+  @Column({ nullable: true })
+  @IsOptional()
+  numeroVueltasSemanales: number;
+
+  @Column({ default: false })
+  convertirA20K: boolean;
 
   @Column({ default: true })
   activo: boolean;
 
   @CreateDateColumn()
-  createdAt: Date;
+  creationDate: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  dateUpdate: Date;
 } 
