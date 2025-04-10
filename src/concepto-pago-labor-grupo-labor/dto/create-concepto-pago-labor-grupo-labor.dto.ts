@@ -3,11 +3,11 @@ import { IsNotEmpty, IsNumber, IsOptional, IsBoolean } from 'class-validator';
 export class CreateConceptoPagoLaborGrupoLaborDto {
   @IsNotEmpty()
   @IsNumber()
-  idConceptoPago: number;
+  conceptoPagoId: number;
 
   @IsNotEmpty()
   @IsNumber()
-  idLaborGrupoLabor: number;
+  laborGrupoLaborId: number;
 
   @IsOptional()
   @IsBoolean()

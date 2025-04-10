@@ -22,14 +22,40 @@ export class CreateRegistroLaborDto {
   cantidad: number;
 
   @IsNotEmpty()
+  @IsNumber()
   valorUnitario: number;
 
   @IsNotEmpty()
+  @IsNumber()
   total: number;
 
   @IsOptional()
   @IsString()
   observaciones?: string;
+
+  @IsOptional()
+  @IsString()
+  detalleCantidad?: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  anio: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  semana: number;
+
+  @IsOptional()
+  @IsNumber()
+  recargo?: number;
+
+  @IsOptional()
+  @IsNumber()
+  horas?: number;
+
+  @IsOptional()
+  @IsNumber()
+  semanasEjecutadas?: number;
 
   @IsOptional()
   @IsNumber()
@@ -38,4 +64,4 @@ export class CreateRegistroLaborDto {
   @IsOptional()
   @IsNumber()
   cantidadLote?: number;
-} 
+}

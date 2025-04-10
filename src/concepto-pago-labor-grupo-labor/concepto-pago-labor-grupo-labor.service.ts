@@ -34,9 +34,9 @@ export class ConceptoPagoLaborGrupoLaborService {
     return entity;
   }
 
-  async findByLaborGrupo(idLaborGrupoLabor: number): Promise<ConceptoPagoLaborGrupoLabor[]> {
+  async findByLaborGrupo(laborGrupoLaborId: number): Promise<ConceptoPagoLaborGrupoLabor[]> {
     return this.conceptoPagoLaborGrupoLaborRepository.find({
-      where: { idLaborGrupoLabor },
+      where: { laborGrupoLaborId },
       relations: {
         conceptoPago: {
           unidadMedida: true
@@ -49,9 +49,9 @@ export class ConceptoPagoLaborGrupoLaborService {
     });
   }
 
-  async findByConceptoPago(idConceptoPago: number): Promise<ConceptoPagoLaborGrupoLabor[]> {
+  async findByConceptoPago(conceptoPagoId: number): Promise<ConceptoPagoLaborGrupoLabor[]> {
     return this.conceptoPagoLaborGrupoLaborRepository.find({
-      where: { idConceptoPago },
+      where: { conceptoPagoId },
       relations: ['conceptoPago', 'laborGrupoLabor']
     });
   }
