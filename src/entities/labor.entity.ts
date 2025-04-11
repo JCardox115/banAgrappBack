@@ -14,6 +14,9 @@ export class Labor {
   @Column()
   descripcion: string;
 
+  @Column()
+  lugarEjecucionId: number;
+
   @Column({ default: false })
   laborPrincipal: boolean;
 

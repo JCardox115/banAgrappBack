@@ -12,6 +12,9 @@ export class CentroCosto {
   @Column()
   descripcion: string;
 
+  @Column()
+  fincaId: number;
+
   @ManyToOne(() => Finca, finca => finca.centrosCosto)
   finca: Finca;
 

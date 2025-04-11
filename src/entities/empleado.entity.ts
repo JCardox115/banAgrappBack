@@ -7,6 +7,9 @@ export class Empleado {
   id: number;
 
   @Column()
+  fincaId: number;
+  
+  @Column()
   codigo: string;
 
   @Column()

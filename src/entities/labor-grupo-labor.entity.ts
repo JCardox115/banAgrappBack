@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn, OneToMany, JoinColumn } from 'typeorm';
 import { ConceptoPagoLaborGrupoLabor } from './concepto-pago-labor-grupo-labor.entity';
 import { Labor } from './labor.entity';
 import { Grupo } from './grupo.entity';
@@ -27,8 +27,10 @@ export class LaborGrupoLabor {
   conceptoPagoLaborGrupoLabor: ConceptoPagoLaborGrupoLabor[];
 
   @ManyToOne(() => Labor)
+  @JoinColumn({ name: 'idLabor' })  // Se le indica a TypeORM que "idLabor" es la FK para la entidad Labor.
   labor: Labor;
 
   @ManyToOne(() => Grupo)
-  grupoLabor: Grupo; 
+  @JoinColumn({ name: 'idGrupoLabor' })  // De igual forma para grupoLabor.
+  grupoLabor: Grupo;
 } 

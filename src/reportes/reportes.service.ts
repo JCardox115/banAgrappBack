@@ -10,24 +10,39 @@ export class ReportesService {
     private registroLaborRepository: Repository<RegistroLabor>,
   ) {}
 
-  async generateTxtReport(empleado: string, fincaId: number, fechaDesde: string, fechaHasta: string): Promise<string> {
+  async generateTxtReport(empleado?: string, fincaId?: number, fechaDesde?: string, fechaHasta?: string, laborCodigo?: string): Promise<string> {
     // Construir la consulta base para buscar registros de labor
     const query = this.registroLaborRepository.createQueryBuilder('registro')
       .leftJoinAndSelect('registro.empleado', 'empleado')
-      .leftJoinAndSelect('registro.laborFinca', 'laborFinca')
+      .leftJoinAndSelect('registro.conceptoPagoLaborGrupoLabor', 'conceptoPagoLaborGrupoLabor')
+      .leftJoinAndSelect('conceptoPagoLaborGrupoLabor.conceptoPago', 'conceptoPago')
+      .leftJoinAndSelect('conceptoPagoLaborGrupoLabor.laborGrupoLabor', 'laborGrupoLabor')
+      .leftJoinAndSelect('laborGrupoLabor.labor', 'labor')
+      .leftJoinAndSelect('laborGrupoLabor.grupoLabor', 'grupoLabor')
+      .leftJoinAndSelect('grupoLabor.finca', 'finca')
       .leftJoinAndSelect('registro.centroCosto', 'centroCosto')
-      .leftJoinAndSelect('registro.lote', 'lote')
-      .leftJoinAndSelect('laborFinca.labor', 'labor')
-      .leftJoinAndSelect('laborFinca.finca', 'finca')
-      .where('finca.id = :fincaId', { fincaId })
-      .andWhere('registro.fecha BETWEEN :fechaDesde AND :fechaHasta', { 
+      .leftJoinAndSelect('registro.lote', 'lote');
+    
+    // Aplicar los filtros solo si se proporcionan
+    if (fincaId) {
+      query.andWhere('finca.id = :fincaId', { fincaId });
+    }
+    
+    if (fechaDesde && fechaHasta) {
+      query.andWhere('registro.fecha BETWEEN :fechaDesde AND :fechaHasta', { 
         fechaDesde, 
         fechaHasta 
       });
+    }
   
     // Agregar filtro de empleado solo si se proporcionó el valor
     if (empleado) {
       query.andWhere('empleado.codigo = :empleado', { empleado });
+    }
+    
+    // Agregar filtro de labor solo si se proporcionó el código
+    if (laborCodigo) {
+      query.andWhere('labor.codigo = :laborCodigo', { laborCodigo });
     }
   
     // Agregar ordenamientos
@@ -36,8 +51,7 @@ export class ReportesService {
       .addOrderBy('registro.fecha', 'ASC')
       .getMany();
   
-    // Formatear según la estructura requerida en export.txt
-    // Formato: employeeCode,IdNumber,fullName,NA,NA,NA,labor_quantity,labor_creation_date,NA,farmCode,c_costo,NA,NA,NA,lote,cant_lote,precio_lote,NA
+    // Inicializar el contenido del reporte (sin cabecera de explicación)
     let reportContent = '';
   
     for (const registro of registros) {
@@ -50,45 +64,68 @@ export class ReportesService {
       const numeroDocumento = registro.empleado.numDocumento || '';
       const nombreCompleto = `${registro.empleado.nombres || ''} ${registro.empleado.apellidos || ''}`;
       
-      // Información de la labor y finca
+      // Obtener código de concepto de pago y valor
+      const codigoConcepto = registro.conceptoPagoLaborGrupoLabor?.conceptoPago?.codigo || '0';
+      const valorConcepto = registro.conceptoPagoLaborGrupoLabor?.conceptoPago?.precio?.toString() || '0';
+      
+      // Información de la labor (añadiendo 'LC' al código)
+      const laborCodigo = registro.conceptoPagoLaborGrupoLabor?.laborGrupoLabor?.labor?.codigo || '';
+      const codigoLaborFormateado = +laborCodigo < 100 ? `LC0${laborCodigo}` : `LC${laborCodigo}`;
+      
+      // Cantidad y detalles
       const cantidadLabor = typeof registro.cantidad === 'number' 
         ? parseFloat(registro.cantidad.toString()).toFixed(5) 
         : '0.00000';
-      const codigoFinca = registro.conceptoPagoLaborGrupoLabor.laborGrupoLabor.grupoLabor.finca.codigo || '';
-      const codigoCentroCosto = registro.centroCosto.codigo || '';
+      
+      // Información de la finca y centro de costo
+      const codigoFinca = registro.conceptoPagoLaborGrupoLabor?.laborGrupoLabor?.grupoLabor?.finca?.codigo || '';
+      const codigoCentroCosto = registro.centroCosto?.codigo || '';
+      
+      // Horas trabajadas
+      const horas = registro.horas?.toString() || '0.00';
+      
+      // Semanas ejecutadas (si aplica)
+      const semanas = registro.semanasEjecutadas?.toString() || '0';
       
       // Información del lote (si existe)
       const codigoLote = registro.lote ? registro.lote.numLote : '';
       const cantidadLote = registro.cantidadLote && typeof registro.cantidadLote === 'number'
         ? parseFloat(registro.cantidadLote.toString()).toFixed(5) 
         : '0.00000';
-      const precioLote = registro.valorUnitario && typeof registro.valorUnitario === 'number'
-        ? parseFloat(registro.valorUnitario.toString()).toFixed(3) 
-        : '0.000';
       
-      // Componer la línea según el formato
-      const linea = [
-        codigoEmpleado,        // employeeCode
-        numeroDocumento,       // IdNumber
-        nombreCompleto,        // fullName
-        '0',                   // NA
-        '0',                   // NA
-        registro.conceptoPagoLaborGrupoLabor.laborGrupoLabor.labor.codigo || '',  // labor_code
-        cantidadLabor,         // labor_quantity
-        fechaFormateada,       // labor_creation_date
-        '.',                   // NA
-        codigoFinca,           // farmCode
-        codigoCentroCosto,     // c_costo
-        '1.00',                // NA
-        '9.50',                // NA
-        'L',                   // NA
-        codigoLote,            // lote
-        cantidadLote,          // cant_lote
-        '0.000',               // precio_lote
-        '3120'                 // NA
+      // Campos adicionales basados en el ejemplo real
+      const punto = '.';
+      const na1 = '1.00'; // Se muestra como 1.00 en el ejemplo
+      const l = 'L'; // Literal L separador
+      const na2 = 'NA2'; // Aparece como 0.000 en el ejemplo
+      const na3 = 'NA3'; // Aparece como 3120 en el ejemplo
+      
+      // Primera parte de la línea con comas como separador (hasta centro de costo)
+      const parte1 = [
+        codigoEmpleado.replace(' ', ''),
+        numeroDocumento,
+        nombreCompleto,
+        codigoConcepto,
+        valorConcepto,
+        codigoLaborFormateado,
+        cantidadLote,
+        fechaFormateada,
+        punto,
+        codigoFinca,
+        codigoCentroCosto,
+        na1
       ].join(',');
-  
-      reportContent += linea + '\n';
+      
+      // Segunda parte sin comas (horas, L, lote, semanas)
+      const parte2 = `${horas}  ${l}    ${codigoLote}     ${semanas}    ${na2}`;
+      
+      // Tercera parte con comas
+      // const parte3 = [na3].join(',');
+      
+      // Unir todas las partes
+      const linea = `${parte1},${parte2},${na3}`;
+      
+      reportContent += `${linea}\n`;
     }
   
     return reportContent || 'No hay datos para el reporte en el período seleccionado.';
