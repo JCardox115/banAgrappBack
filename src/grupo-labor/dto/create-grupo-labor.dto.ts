@@ -1,11 +1,11 @@
 import { IsBoolean, IsNumber, IsOptional } from 'class-validator';
 
-export class CreateLaborGrupoLaborDto {
+export class CreateGrupoLaborDto {
   @IsNumber()
   idLabor: number;
 
   @IsNumber()
-  idGrupoLabor: number;
+  idGrupo: number;
 
   @IsOptional()
   @IsBoolean()

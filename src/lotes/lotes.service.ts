@@ -14,7 +14,7 @@ export class LotesService {
 
   async findAll(fincaId?: number): Promise<Lote[]> {
     const query = this.loteRepository.createQueryBuilder('lote');
-    query.where('lote.activo = :activo', { activo: true });
+    // query.where('lote.activo = :activo', { activo: true });
     
     if (fincaId) {
       query.andWhere('lote.finca = :fincaId', { fincaId });

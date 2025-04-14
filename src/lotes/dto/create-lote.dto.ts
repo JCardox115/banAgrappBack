@@ -14,9 +14,14 @@ export class CreateLoteDto {
   @IsNotEmpty()
   tipoSueloId: number;
 
-  @IsNumber()
   @IsNotEmpty()
   hectareasNetas: number;
+
+  @IsString()
+  creationDate: string;
+
+  @IsString()
+  updateDate: string;
 
   @IsOptional()
   activo?: boolean;

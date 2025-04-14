@@ -14,11 +14,11 @@ export class ReportesService {
     // Construir la consulta base para buscar registros de labor
     const query = this.registroLaborRepository.createQueryBuilder('registro')
       .leftJoinAndSelect('registro.empleado', 'empleado')
-      .leftJoinAndSelect('registro.conceptoPagoLaborGrupoLabor', 'conceptoPagoLaborGrupoLabor')
-      .leftJoinAndSelect('conceptoPagoLaborGrupoLabor.conceptoPago', 'conceptoPago')
-      .leftJoinAndSelect('conceptoPagoLaborGrupoLabor.laborGrupoLabor', 'laborGrupoLabor')
-      .leftJoinAndSelect('laborGrupoLabor.labor', 'labor')
-      .leftJoinAndSelect('laborGrupoLabor.grupoLabor', 'grupoLabor')
+      .leftJoinAndSelect('registro.conceptoPagoGrupoLabor', 'conceptoPagoGrupoLabor')
+      .leftJoinAndSelect('conceptoPagoGrupoLabor.conceptoPago', 'conceptoPago')
+      .leftJoinAndSelect('conceptoPagoGrupoLabor.grupoLabor', 'grupoLabor')
+      .leftJoinAndSelect('grupoLabor.labor', 'labor')
+      .leftJoinAndSelect('grupoLabor.grupoLabor', 'grupoLabor')
       .leftJoinAndSelect('grupoLabor.finca', 'finca')
       .leftJoinAndSelect('registro.centroCosto', 'centroCosto')
       .leftJoinAndSelect('registro.lote', 'lote');
@@ -65,11 +65,11 @@ export class ReportesService {
       const nombreCompleto = `${registro.empleado.nombres || ''} ${registro.empleado.apellidos || ''}`;
       
       // Obtener código de concepto de pago y valor
-      const codigoConcepto = registro.conceptoPagoLaborGrupoLabor?.conceptoPago?.codigo || '0';
-      const valorConcepto = registro.conceptoPagoLaborGrupoLabor?.conceptoPago?.precio?.toString() || '0';
+      const codigoConcepto = registro.conceptoPagoGrupoLabor?.conceptoPago?.codigo || '0';
+      const valorConcepto = registro.conceptoPagoGrupoLabor?.conceptoPago?.precio?.toString() || '0';
       
       // Información de la labor (añadiendo 'LC' al código)
-      const laborCodigo = registro.conceptoPagoLaborGrupoLabor?.laborGrupoLabor?.labor?.codigo || '';
+      const laborCodigo = registro.conceptoPagoGrupoLabor?.grupoLabor?.labor?.codigo || '';
       const codigoLaborFormateado = +laborCodigo < 100 ? `LC0${laborCodigo}` : `LC${laborCodigo}`;
       
       // Cantidad y detalles
@@ -78,7 +78,7 @@ export class ReportesService {
         : '0.00000';
       
       // Información de la finca y centro de costo
-      const codigoFinca = registro.conceptoPagoLaborGrupoLabor?.laborGrupoLabor?.grupoLabor?.finca?.codigo || '';
+      const codigoFinca = registro.conceptoPagoGrupoLabor?.grupoLabor?.grupo?.finca?.codigo || '';
       const codigoCentroCosto = registro.centroCosto?.codigo || '';
       
       // Horas trabajadas

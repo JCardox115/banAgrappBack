@@ -15,15 +15,18 @@ export class RegistrosLaborService {
   async findAll(fincaId?: number): Promise<RegistroLabor[]> {
     const query = this.registroRepository.createQueryBuilder('registro');
     query.leftJoinAndSelect('registro.empleado', 'empleado');
-    query.leftJoinAndSelect('registro.conceptoPagoLaborGrupoLabor', 'conceptoPagoLaborGrupoLabor');
+    query.leftJoinAndSelect('registro.conceptoPagoGrupoLabor', 'conceptoPagoGrupoLabor');
     query.leftJoinAndSelect('registro.centroCosto', 'centroCosto');
     query.leftJoinAndSelect('registro.lote', 'lote');
-    query.leftJoinAndSelect('conceptoPagoLaborGrupoLabor.labor', 'labor');
-    query.leftJoinAndSelect('conceptoPagoLaborGrupoLabor.finca', 'finca');
-    query.leftJoinAndSelect('labor.unidadMedida', 'unidadMedida');
+    query.leftJoinAndSelect('conceptoPagoGrupoLabor.conceptoPago', 'conceptoPago');
+    query.leftJoinAndSelect('conceptoPagoGrupoLabor.grupoLabor', 'grupoLabor');
+    query.leftJoinAndSelect('grupoLabor.labor', 'labor');
+    query.leftJoinAndSelect('grupoLabor.grupo', 'grupo');
     
+    // Si necesitamos filtrar por finca, usamos una subconsulta para evitar errores
     if (fincaId) {
-      query.andWhere('finca.id = :fincaId', { fincaId });
+      // Obtenemos los grupos con esta finca
+      query.andWhere('grupo.fincaId = :fincaId', { fincaId });
     }
     
     query.orderBy('registro.fecha', 'DESC');
@@ -36,12 +39,14 @@ export class RegistrosLaborService {
       where: { id },
       relations: [
         'empleado', 
-        'conceptoPagoLaborGrupoLabor', 
+        'conceptoPagoGrupoLabor', 
         'centroCosto', 
         'lote', 
-        'conceptoPagoLaborGrupoLabor.labor', 
-        'conceptoPagoLaborGrupoLabor.finca',
-        'conceptoPagoLaborGrupoLabor.labor.unidadMedida'
+        'conceptoPagoGrupoLabor.conceptoPago',
+        'conceptoPagoGrupoLabor.grupoLabor',
+        'conceptoPagoGrupoLabor.grupoLabor.labor',
+        'conceptoPagoGrupoLabor.grupoLabor.grupo',
+        'conceptoPagoGrupoLabor.grupoLabor.labor.unidadMedida'
       ] 
     });
     
@@ -55,7 +60,7 @@ export class RegistrosLaborService {
   async create(createRegistroLaborDto: CreateRegistroLaborDto): Promise<RegistroLabor> {
     const { 
       empleadoId, 
-      conceptoPagoLaborGrupoLaborId, 
+      conceptoPagoGrupoLaborId, 
       centroCostoId, 
       loteId, 
       ...registroData 
@@ -68,7 +73,7 @@ export class RegistrosLaborService {
       ...registroData,
       total,
       empleado: { id: empleadoId },
-      conceptoPagoLaborGrupoLabor: { id: conceptoPagoLaborGrupoLaborId },
+      conceptoPagoGrupoLabor: { id: conceptoPagoGrupoLaborId },
       centroCosto: { id: centroCostoId },
       ...(loteId ? { lote: { id: loteId } } : {})
     });
@@ -80,7 +85,7 @@ export class RegistrosLaborService {
     const registrosToSave = registrosDto.map(dto => {
       const { 
         empleadoId, 
-        conceptoPagoLaborGrupoLaborId, 
+        conceptoPagoGrupoLaborId, 
         centroCostoId, 
         loteId, 
         ...registroData 
@@ -93,7 +98,7 @@ export class RegistrosLaborService {
         ...registroData,
         total,
         empleado: { id: empleadoId },
-        conceptoPagoLaborGrupoLabor: { id: conceptoPagoLaborGrupoLaborId },
+        conceptoPagoGrupoLabor: { id: conceptoPagoGrupoLaborId },
         centroCosto: { id: centroCostoId },
         ...(loteId ? { lote: { id: loteId } } : {})
       });
@@ -107,7 +112,7 @@ export class RegistrosLaborService {
     
     const { 
       empleadoId, 
-      conceptoPagoLaborGrupoLaborId, 
+      conceptoPagoGrupoLaborId, 
       centroCostoId, 
       loteId,
       ...registroData 
@@ -117,8 +122,8 @@ export class RegistrosLaborService {
       registro.empleado = { id: empleadoId } as any;
     }
     
-    if (conceptoPagoLaborGrupoLaborId) {
-      registro.conceptoPagoLaborGrupoLabor = { id: conceptoPagoLaborGrupoLaborId } as any;
+    if (conceptoPagoGrupoLaborId) {
+      registro.conceptoPagoGrupoLabor = { id: conceptoPagoGrupoLaborId } as any;
     }
     
     if (centroCostoId) {

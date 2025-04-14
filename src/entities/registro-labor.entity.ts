@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, Up
 import { Empleado } from './empleado.entity';
 import { Lote } from './lote.entity';
 import { CentroCosto } from './centro-costo.entity';
-import { ConceptoPagoLaborGrupoLabor } from './concepto-pago-labor-grupo-labor.entity';
+import { ConceptoPagoGrupoLabor } from './concepto-pago-grupo-labor.entity';
 
 
 @Entity('registros_labor')
@@ -13,8 +13,8 @@ export class RegistroLabor {
   @ManyToOne(() => Empleado)
   empleado: Empleado;
 
-  @ManyToOne(() => ConceptoPagoLaborGrupoLabor)
-  conceptoPagoLaborGrupoLabor: ConceptoPagoLaborGrupoLabor;
+  @ManyToOne(() => ConceptoPagoGrupoLabor)
+  conceptoPagoGrupoLabor: ConceptoPagoGrupoLabor;
 
   @ManyToOne(() => CentroCosto)
   centroCosto: CentroCosto;

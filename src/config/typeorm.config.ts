@@ -9,9 +9,9 @@ import { UnidadMedida } from '../entities/unidad-medida.entity';
 import { RegistroLabor } from '../entities/registro-labor.entity';
 import { LugarEjecucion } from 'src/entities/lugar-ejecucion.entity';
 import { TipoSuelo } from 'src/entities/tipo-suelo.entity';
-import { LaborGrupoLabor } from 'src/entities/labor-grupo-labor.entity';
+import { GrupoLabor } from 'src/entities/grupo-labor.entity';
 import { Grupo } from 'src/entities/grupo.entity';
-import { ConceptoPagoLaborGrupoLabor } from 'src/entities/concepto-pago-labor-grupo-labor.entity';
+import { ConceptoPagoGrupoLabor } from 'src/entities/concepto-pago-grupo-labor.entity';
 import { ConceptoPago } from 'src/entities/concepto-pago.entity';
 
 
@@ -30,9 +30,9 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
     Empleado,
     Grupo,
     Labor,
-    LaborGrupoLabor,
+    GrupoLabor,
     ConceptoPago,
-    ConceptoPagoLaborGrupoLabor,
+    ConceptoPagoGrupoLabor,
     UnidadMedida,
     RegistroLabor,
     LugarEjecucion,

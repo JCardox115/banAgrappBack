@@ -1,6 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Finca } from './finca.entity';
-import { Labor } from './labor.entity';
 
 @Entity('grupos')
 export class Grupo {

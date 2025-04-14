@@ -18,9 +18,9 @@ import { TestController } from './controllers/test.controller';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { GruposLaborModule } from './grupos/grupos.module';
 import { TiposSueloModule } from './tipos-suelo/tipos-suelo.module';
-import { LaborGrupoLaborModule } from './labor-grupo-labor/labor-grupo-labor.module';
+import { GrupoLaborModule } from './grupo-labor/grupo-labor.module';
 import { ConceptosPagoModule } from './conceptos-pago/conceptos-pago.module';
-import { ConceptoPagoLaborGrupoLaborModule } from './concepto-pago-labor-grupo-labor/concepto-pago-labor-grupo-labor.module';
+import { ConceptoPagoGrupoLaborModule } from './concepto-pago-grupo-labor/concepto-pago-grupo-labor.module';
 
 @Module({
   imports: [
@@ -60,9 +60,9 @@ import { ConceptoPagoLaborGrupoLaborModule } from './concepto-pago-labor-grupo-l
     UsuariosModule,
     GruposLaborModule,
     TiposSueloModule,
-    LaborGrupoLaborModule,
+    GrupoLaborModule,
     ConceptosPagoModule,
-    ConceptoPagoLaborGrupoLaborModule
+    ConceptoPagoGrupoLaborModule
   ],
   controllers: [CorsController, TestController],
 })
