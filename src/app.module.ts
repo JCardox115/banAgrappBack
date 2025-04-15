@@ -21,6 +21,7 @@ import { TiposSueloModule } from './tipos-suelo/tipos-suelo.module';
 import { GrupoLaborModule } from './grupo-labor/grupo-labor.module';
 import { ConceptosPagoModule } from './conceptos-pago/conceptos-pago.module';
 import { ConceptoPagoGrupoLaborModule } from './concepto-pago-grupo-labor/concepto-pago-grupo-labor.module';
+import { UserFincaModule } from './user-finca/user-finca.module';
 
 @Module({
   imports: [
@@ -62,7 +63,8 @@ import { ConceptoPagoGrupoLaborModule } from './concepto-pago-grupo-labor/concep
     TiposSueloModule,
     GrupoLaborModule,
     ConceptosPagoModule,
-    ConceptoPagoGrupoLaborModule
+    ConceptoPagoGrupoLaborModule,
+    UserFincaModule
   ],
   controllers: [CorsController, TestController],
 })

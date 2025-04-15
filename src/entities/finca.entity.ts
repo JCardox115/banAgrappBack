@@ -1,8 +1,9 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn, ManyToMany } from 'typeorm';
 import { Lote } from './lote.entity';
 import { CentroCosto } from './centro-costo.entity';
 import { IsOptional } from 'class-validator';
-import { Grupo} from './grupo.entity';
+import { Grupo } from './grupo.entity';
+import { User } from './user.entity';
 
 @Entity('fincas')
 export class Finca {
@@ -26,6 +27,9 @@ export class Finca {
 
   @OneToMany(() => Grupo, grupo => grupo.finca)
   grupos: Grupo[];
+
+  @ManyToMany(() => User, user => user.fincas)
+  usuarios: User[];
 
   @IsOptional()
   @CreateDateColumn({ name: 'creationDate' })

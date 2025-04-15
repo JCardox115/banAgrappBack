@@ -17,9 +17,9 @@ export class ReportesService {
       .leftJoinAndSelect('registro.conceptoPagoGrupoLabor', 'conceptoPagoGrupoLabor')
       .leftJoinAndSelect('conceptoPagoGrupoLabor.conceptoPago', 'conceptoPago')
       .leftJoinAndSelect('conceptoPagoGrupoLabor.grupoLabor', 'grupoLabor')
-      .leftJoinAndSelect('grupoLabor.labor', 'labor')
-      .leftJoinAndSelect('grupoLabor.grupoLabor', 'grupoLabor')
-      .leftJoinAndSelect('grupoLabor.finca', 'finca')
+      // .leftJoinAndSelect('grupoLabor.labor', 'labor')
+      // .leftJoinAndSelect('grupoLabor.grupo', 'grupo')
+      .leftJoinAndSelect('empleado.finca', 'finca')
       .leftJoinAndSelect('registro.centroCosto', 'centroCosto')
       .leftJoinAndSelect('registro.lote', 'lote');
     

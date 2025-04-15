@@ -7,8 +7,8 @@ import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.int
 export const corsConfig: CorsOptions = {
   origin: [
     'https://reportes-nomina.netlify.app',
-    'https://7f0e-2800-e2-1e80-2722-dc39-53b-f7ea-c94d.ngrok-free.app',
-    'https://7f0e-2800-e2-1e80-2722-dc39-53b-f7ea-c94d.ngrok-free.app',
+    'https://8d26-2800-e2-1e80-2722-c85d-65c1-6f41-f4f0.ngrok-free.app',
+    'https://8d26-2800-e2-1e80-2722-c85d-65c1-6f41-f4f0.ngrok-free.app',
     'http://localhost:4200'
   ],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',

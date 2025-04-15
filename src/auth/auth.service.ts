@@ -23,6 +23,12 @@ export class AuthService {
   }
 
   async login(user: any) {
+    // Cargar las fincas del usuario
+    const userWithFincas = await this.userRepository.findOne({
+      where: { id: user.id },
+      relations: ['fincas']
+    });
+
     const payload = { email: user.email, sub: user.id, role: user.role };
     return {
       access_token: this.jwtService.sign(payload),
@@ -32,7 +38,8 @@ export class AuthService {
         role: user.role,
         firstName: user.firstName,
         lastName: user.lastName,
-        selectedFincaId: user.selectedFincaId
+        selectedFincaId: user.selectedFincaId,
+        fincas: userWithFincas?.fincas || []
       }
     };
   }

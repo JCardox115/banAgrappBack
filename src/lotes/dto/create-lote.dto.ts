@@ -18,9 +18,11 @@ export class CreateLoteDto {
   hectareasNetas: number;
 
   @IsString()
+  @IsOptional()
   creationDate: string;
 
   @IsString()
+  @IsOptional()
   updateDate: string;
 
   @IsOptional()

@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable } from 'typeorm';
+import { Finca } from './finca.entity';
 
 @Entity('users')
 export class User {
@@ -25,6 +26,14 @@ export class User {
 
   @Column({ default: true })
   active: boolean;
+
+  @ManyToMany(() => Finca)
+  @JoinTable({
+    name: 'user_finca',
+    joinColumn: { name: 'userId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'fincaId', referencedColumnName: 'id' }
+  })
+  fincas: Finca[];
 
   @CreateDateColumn()
   createdAt: Date;
