@@ -21,6 +21,9 @@ export class CentroCosto {
   @Column({ default: true })
   activo: boolean;
 
+  @Column({ default: false })
+  isPrincipal: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

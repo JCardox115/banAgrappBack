@@ -17,7 +17,7 @@ export class ReportesService {
       .leftJoinAndSelect('registro.conceptoPagoGrupoLabor', 'conceptoPagoGrupoLabor')
       .leftJoinAndSelect('conceptoPagoGrupoLabor.conceptoPago', 'conceptoPago')
       .leftJoinAndSelect('conceptoPagoGrupoLabor.grupoLabor', 'grupoLabor')
-      // .leftJoinAndSelect('grupoLabor.labor', 'labor')
+      .leftJoinAndSelect('grupoLabor.labor', 'labor')
       // .leftJoinAndSelect('grupoLabor.grupo', 'grupo')
       .leftJoinAndSelect('empleado.finca', 'finca')
       .leftJoinAndSelect('registro.centroCosto', 'centroCosto')
@@ -69,7 +69,7 @@ export class ReportesService {
       const valorConcepto = registro.conceptoPagoGrupoLabor?.conceptoPago?.precio?.toString() || '0';
       
       // Información de la labor (añadiendo 'LC' al código)
-      const laborCodigo = registro.conceptoPagoGrupoLabor?.grupoLabor?.labor?.codigo || '';
+      const laborCodigo = registro.conceptoPagoGrupoLabor?.conceptoPago?.codigo || '';
       const codigoLaborFormateado = +laborCodigo < 100 ? `LC0${laborCodigo}` : `LC${laborCodigo}`;
       
       // Cantidad y detalles
@@ -105,7 +105,7 @@ export class ReportesService {
         codigoEmpleado.replace(' ', ''),
         numeroDocumento,
         nombreCompleto,
-        codigoConcepto,
+        '0',
         valorConcepto,
         codigoLaborFormateado,
         cantidadLote,

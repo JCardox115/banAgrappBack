@@ -17,6 +17,10 @@ export class CreateCentroCostoDto {
   @IsOptional()
   activo?: boolean;
 
+  @IsBoolean()
+  @IsOptional()
+  isPrincipal?: boolean;
+
   @IsNotEmpty()
   fincaId: number;
 } 
