@@ -22,6 +22,7 @@ import { GrupoLaborModule } from './grupo-labor/grupo-labor.module';
 import { ConceptosPagoModule } from './conceptos-pago/conceptos-pago.module';
 import { ConceptoPagoGrupoLaborModule } from './concepto-pago-grupo-labor/concepto-pago-grupo-labor.module';
 import { UserFincaModule } from './user-finca/user-finca.module';
+import { ImportacionesModule } from './importaciones/importaciones.module';
 
 @Module({
   imports: [
@@ -64,7 +65,8 @@ import { UserFincaModule } from './user-finca/user-finca.module';
     GrupoLaborModule,
     ConceptosPagoModule,
     ConceptoPagoGrupoLaborModule,
-    UserFincaModule
+    UserFincaModule,
+    ImportacionesModule
   ],
   controllers: [CorsController, TestController],
 })
