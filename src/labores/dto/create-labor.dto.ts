@@ -5,9 +5,9 @@ export class CreateLaborDto {
   @IsNumber()
   id?: number;
   
-  @IsNotEmpty()
-  @IsString()
-  codigo: string;
+  @IsOptional()
+  @IsNumber()
+  codigo?: number;
 
   @IsNotEmpty()
   @IsString()

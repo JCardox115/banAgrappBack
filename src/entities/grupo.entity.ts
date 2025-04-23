@@ -22,8 +22,8 @@ export class Grupo {
   activo: boolean;
 
   @CreateDateColumn()
-  creationDate: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  dateUpdate: Date;
+  updatedAt: Date;
 } 

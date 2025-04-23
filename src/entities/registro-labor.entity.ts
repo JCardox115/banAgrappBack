@@ -59,8 +59,8 @@ export class RegistroLabor {
   cantidad: number;
 
   @CreateDateColumn()
-  creationDate: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  dateUpdate: Date;
+  updatedAt: Date;
 } 

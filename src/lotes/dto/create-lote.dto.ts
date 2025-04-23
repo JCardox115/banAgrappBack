@@ -19,7 +19,7 @@ export class CreateLoteDto {
 
   @IsString()
   @IsOptional()
-  creationDate: string;
+  createdAt: string;
 
   @IsString()
   @IsOptional()

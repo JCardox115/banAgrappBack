@@ -32,8 +32,8 @@ export class Finca {
   usuarios: User[];
 
   @IsOptional()
-  @CreateDateColumn({ name: 'creationDate' })
-  creationDate: Date;
+  @CreateDateColumn({ name: 'createdAt' })
+  createdAt: Date;
   
   @IsOptional()
   @UpdateDateColumn({ name: 'updateDate' })

@@ -8,8 +8,7 @@ export class CreateConceptoPagoDto {
   id: number;
 
   @IsNotEmpty()
-  @IsString()
-  codigo: string;
+  codigo: number;
 
   @IsNotEmpty()
   @IsString()
@@ -27,10 +26,10 @@ export class CreateConceptoPagoDto {
   unidadMedida: UnidadMedida;
 
   @IsOptional()
-  creationDate: Date;
+  createdAt: Date;
 
   @IsOptional()
-  dateUpdate: Date;
+  updatedAt: Date;
 
   @IsOptional()
   @IsBoolean()

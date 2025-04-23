@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ImportacionesController } from './importaciones.controller';
-import { ImportacionesService } from './importaciones.service';
 import { Labor } from '../entities/labor.entity';
 import { Empleado } from '../entities/empleado.entity';
 import { Lote } from '../entities/lote.entity';
@@ -12,6 +10,8 @@ import { TipoSuelo } from '../entities/tipo-suelo.entity';
 import { GrupoLabor } from '../entities/grupo-labor.entity';
 import { ConceptoPago } from '../entities/concepto-pago.entity';
 import { ConceptoPagoGrupoLabor } from '../entities/concepto-pago-grupo-labor.entity';
+import { ImportacionesService } from './importaciones.service';
+import { ImportacionesController } from './importaciones.controller';
 
 @Module({
   imports: [

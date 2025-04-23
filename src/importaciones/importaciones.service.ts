@@ -47,7 +47,7 @@ export class ImportacionesService {
       'lugarEjecucion': this.lugarEjecucionRepository,
       'tipoSuelo': this.tipoSueloRepository,
       'grupoLabor': this.grupoLaborRepository,
-      'conceptoPago': this.conceptoPagoRepository,
+      'conceptosPago': this.conceptoPagoRepository,
       'conceptoPagoGrupoLabor': this.conceptoPagoGrupoLaborRepository
     };
 
@@ -68,21 +68,24 @@ export class ImportacionesService {
       // Validar y preparar los datos
       for (const item of data) {
         try {
+          // Limpiar y convertir valores numéricos
+          const cleanedItem = this.cleanNumericValues(item);
+
           // Validar campos requeridos
-          if (!item.codigo || !item.descripcion) {
+          if (cleanedItem.codigo == 0 || !cleanedItem.descripcion) {
             errors.push(`Registro inválido: código y descripción son requeridos`);
             continue;
           }
 
           // Verificar si ya existe un registro con el mismo código
-          const existing = await repository.findOne({ where: { codigo: item.codigo } });
+          const existing = await repository.findOne({ where: { codigo: cleanedItem.codigo } });
           if (existing) {
-            errors.push(`Registro con código ${item.codigo} ya existe`);
+            errors.push(`Registro con código ${cleanedItem.codigo} ya existe`);
             continue;
           }
 
           validData.push({
-            ...item,
+            ...cleanedItem,
             activo: true,
             createdAt: new Date(),
             updatedAt: new Date()
@@ -99,7 +102,7 @@ export class ImportacionesService {
           errors
         };
       }
-
+      console.log(validData);
       // Guardar los datos válidos
       await repository.save(validData);
 
@@ -115,5 +118,31 @@ export class ImportacionesService {
         errors: [error.message]
       };
     }
+  }
+
+  // Método para limpiar y convertir valores numéricos
+  private cleanNumericValues(item: any): any {
+    const cleanedItem: any = {};
+    
+    for (const key in item) {
+      let value = item[key];
+      
+      // Verificar si es un string que representa un número
+      if (typeof value === 'string') {
+        // Limpiar espacios en blanco
+        const trimmedValue = value.trim();
+        
+        // Intentar convertir a número si es posible
+        if (!isNaN(Number(trimmedValue))) {
+          cleanedItem[key] = Number(trimmedValue);
+        } else {
+          cleanedItem[key] = trimmedValue;
+        }
+      } else {
+        cleanedItem[key] = value;
+      }
+    }
+    
+    return cleanedItem;
   }
 } 

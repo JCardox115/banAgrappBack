@@ -1,5 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { UnidadMedida } from './unidad-medida.entity';
+import { IsNumber, IsOptional } from 'class-validator';
 
 @Entity('conceptos_pago')
 export class ConceptoPago {
@@ -7,10 +8,16 @@ export class ConceptoPago {
   id: number;
 
   @Column()
-  codigo: string;
+  @IsOptional()
+  codigo?: number;
 
   @Column()
   descripcion: string;
+
+  @Column()
+  @IsOptional()
+  @IsNumber()
+  unidadMedidaId?: number;
 
   @ManyToOne(() => UnidadMedida)
   unidadMedida: UnidadMedida;
@@ -22,8 +29,8 @@ export class ConceptoPago {
   activo: boolean;
 
   @CreateDateColumn()
-  creationDate: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  dateUpdate: Date;
+  updatedAt: Date;
 } 

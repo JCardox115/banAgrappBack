@@ -24,7 +24,7 @@ export class Lote {
   activo: boolean;
 
   @CreateDateColumn({ name: 'creation_date' })
-  creationDate: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({ name: 'update_date' })
   updateDate: Date;

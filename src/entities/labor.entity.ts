@@ -1,7 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn, IsNull } from 'typeorm';
 import { UnidadMedida } from './unidad-medida.entity';
 import { LugarEjecucion } from './lugar-ejecucion.entity';
-import { IsOptional } from 'class-validator';
+import { IsNumber, IsOptional } from 'class-validator';
 
 @Entity('labores')
 export class Labor {
@@ -9,7 +9,8 @@ export class Labor {
   id: number;
 
   @Column()
-  codigo: string;
+  @IsOptional()
+  codigo?: number;
 
   @Column()
   descripcion: string;
@@ -41,8 +42,8 @@ export class Labor {
   activo: boolean;
 
   @CreateDateColumn()
-  creationDate: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  dateUpdate: Date;
+  updatedAt: Date;
 } 

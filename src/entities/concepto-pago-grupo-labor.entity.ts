@@ -20,10 +20,10 @@ export class ConceptoPagoGrupoLabor {
   activo: boolean;
 
   @CreateDateColumn()
-  creationDate: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  dateUpdate: Date;
+  updatedAt: Date;
 
   @OneToMany(() => RegistroLabor, registroLabor => registroLabor.conceptoPagoGrupoLabor)
   registrosLabor: RegistroLabor[];

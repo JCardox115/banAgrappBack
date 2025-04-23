@@ -19,11 +19,11 @@ export class CreateGrupoDto {
 
   @IsOptional()
   @IsString()
-  creationDate: string;
+  createdAt: string;
 
   @IsOptional()
   @IsString()
-  dateUpdate: string;
+  updatedAt: string;
 
   @IsOptional()
   @IsBoolean()
