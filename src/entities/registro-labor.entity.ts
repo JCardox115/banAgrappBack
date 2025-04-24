@@ -4,6 +4,10 @@ import { Lote } from './lote.entity';
 import { CentroCosto } from './centro-costo.entity';
 import { ConceptoPagoGrupoLabor } from './concepto-pago-grupo-labor.entity';
 
+export enum TipoRegistro {
+  POR_LABOR = 'POR_LABOR',
+  POR_EMPLEADO = 'POR_EMPLEADO'
+}
 
 @Entity('registros_labor')
 export class RegistroLabor {
@@ -57,6 +61,13 @@ export class RegistroLabor {
 
   @Column('decimal', { precision: 10, scale: 2 })
   cantidad: number;
+
+  @Column({
+    type: 'enum',
+    enum: TipoRegistro,
+    default: TipoRegistro.POR_EMPLEADO
+  })
+  tipoRegistro: TipoRegistro;
 
   @CreateDateColumn()
   createdAt: Date;
