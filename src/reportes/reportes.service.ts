@@ -73,8 +73,8 @@ export class ReportesService {
       const codigoLaborFormateado = +laborCodigo < 100 ? `LC0${laborCodigo}` : `LC${laborCodigo}`;
       
       // Cantidad y detalles
-      const cantidadLabor = typeof registro.cantidad === 'number' 
-        ? parseFloat(registro.cantidad.toString()).toFixed(5) 
+      const cantidadLabor = typeof registro.cantidad === 'string' 
+        ? parseFloat(registro.cantidad).toFixed(5) 
         : '0.00000';
       
       // Información de la finca y centro de costo
@@ -108,7 +108,7 @@ export class ReportesService {
         '0',
         valorConcepto,
         codigoLaborFormateado,
-        cantidadLote,
+        cantidadLabor,
         fechaFormateada,
         punto,
         codigoFinca,
