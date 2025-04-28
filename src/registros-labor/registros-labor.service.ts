@@ -73,7 +73,7 @@ export class RegistrosLaborService {
     } = createRegistroLaborDto;
     
     // Calcular el total
-    const total = createRegistroLaborDto.cantidad * createRegistroLaborDto.valorUnitario;
+    const total = createRegistroLaborDto.cantidad * (createRegistroLaborDto.valorUnitario || 0);
     
     const registro = this.registroRepository.create({
       ...registroData,
@@ -125,7 +125,7 @@ export class RegistrosLaborService {
       } = dto;
       
       // Calcular el total para cada registro
-      const total = dto.cantidad * dto.valorUnitario;
+      const total = dto.cantidad * (dto.valorUnitario || 0);
       
       return this.registroRepository.create({
         ...registroData,
@@ -176,7 +176,7 @@ export class RegistrosLaborService {
     if (updateRegistroLaborDto.cantidad || updateRegistroLaborDto.valorUnitario) {
       const cantidad = updateRegistroLaborDto.cantidad || registro.cantidad;
       const valorUnitario = updateRegistroLaborDto.valorUnitario || registro.valorUnitario;
-      registro.total = cantidad * valorUnitario;
+      registro.total = cantidad * (valorUnitario ||  0);
     }
     
     return this.registroRepository.save(registro);

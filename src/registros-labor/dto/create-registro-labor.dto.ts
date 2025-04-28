@@ -22,13 +22,14 @@ export class CreateRegistroLaborDto {
   @IsNumber()
   cantidad: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
-  valorUnitario: number;
+  valorUnitario?: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
-  total: number;
+  
+  total?: number;
 
   @IsOptional()
   @IsString()

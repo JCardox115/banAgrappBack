@@ -4,6 +4,7 @@ import { Lote } from './lote.entity';
 import { CentroCosto } from './centro-costo.entity';
 import { ConceptoPagoGrupoLabor } from './concepto-pago-grupo-labor.entity';
 import { RegistroLaborDetalle } from './registro-labor-detalle.entity';
+import { IsOptional } from 'class-validator';
 
 export enum TipoRegistro {
   POR_LABOR = 'POR_LABOR',
@@ -33,11 +34,13 @@ export class RegistroLabor {
   @Column({ type: 'date' })
   fecha: Date;
 
-  @Column('decimal', { precision: 10, scale: 2 })
-  valorUnitario: number;
+  @IsOptional()
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  valorUnitario?: number;
 
-  @Column('decimal', { precision: 10, scale: 2 })
-  total: number;
+  @IsOptional()
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  total?: number;
 
   @Column({ nullable: true })
   detalleCantidad: string;

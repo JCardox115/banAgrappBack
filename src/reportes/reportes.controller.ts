@@ -8,6 +8,54 @@ export class ReportesController {
   
   constructor(private readonly reportesService: ReportesService) {}
 
+  @Post('vista-previa')
+  async obtenerVistaPrevia(
+    @Body() reportData: { 
+      empleado?: string; 
+      fincaId: number; 
+      fechaDesde: string; 
+      fechaHasta: string;
+      laborCodigo?: string;
+    }
+  ) {
+    try {
+      const { empleado, fincaId, fechaDesde, fechaHasta, laborCodigo } = reportData;
+      
+      // Validar los parámetros
+      if (!fincaId) {
+        return {
+          success: false,
+          message: 'El ID de la finca es obligatorio',
+          data: []
+        };
+      }
+      
+      // Log para depuración
+      this.logger.log(`Obteniendo vista previa con: fincaId=${fincaId}, fechaDesde=${fechaDesde}, fechaHasta=${fechaHasta}, empleado=${empleado}, laborCodigo=${laborCodigo}`);
+      
+      const registros = await this.reportesService.obtenerRegistrosParaVistaPrevia(
+        empleado,
+        fincaId,
+        fechaDesde,
+        fechaHasta,
+        laborCodigo
+      );
+
+      return {
+        success: true,
+        data: registros
+      };
+    } catch (error) {
+      this.logger.error('Error obteniendo vista previa:', error);
+      return {
+        success: false,
+        message: 'Error al obtener la vista previa',
+        error: error.message,
+        data: []
+      };
+    }
+  }
+
   @Post('generate-txt')
   async generateTxtReport(
     @Body() reportData: { 
