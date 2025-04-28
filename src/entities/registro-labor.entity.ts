@@ -21,6 +21,9 @@ export class RegistroLabor {
   @Column()
   conceptoPagoGrupoLaborId: number;
 
+  @Column()
+  centroCostoId: number;
+
   @ManyToOne(() => ConceptoPagoGrupoLabor)
   conceptoPagoGrupoLabor: ConceptoPagoGrupoLabor;
 
