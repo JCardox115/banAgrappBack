@@ -18,7 +18,7 @@ export class GruposLaborService {
     query.where('grupoLabor.activo = :activo', { activo: true });
     
     if (fincaId) {
-      query.andWhere('grupoLabor.finca = :fincaId', { fincaId });
+      query.andWhere('grupoLabor.fincaId = :fincaId', { fincaId });
     }
     
     return query.getMany();

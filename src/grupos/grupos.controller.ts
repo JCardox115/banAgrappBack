@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Put, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Put, ParseIntPipe, Optional } from '@nestjs/common';
 import { GruposLaborService } from './grupos.service';
 import { CreateGrupoDto } from './dto/create-grupo.dto';
 import { UpdateGrupoDto } from './dto/update-grupo.dto';
@@ -15,27 +15,27 @@ export class GruposLaborController {
   }
 
   @Get()
-  findAll(@Query('fincaId', ParseIntPipe) fincaId?: number) {
-    return this.gruposLaborService.findAll(fincaId);
+  findAll(@Query('fincaId') fincaId?: string) {
+    return this.gruposLaborService.findAll(fincaId ? parseInt(fincaId) : undefined);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.gruposLaborService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: number, @Body() updateGrupoLaborDto: UpdateGrupoDto) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateGrupoLaborDto: UpdateGrupoDto) {
     return this.gruposLaborService.update(id, updateGrupoLaborDto);
   }
 
   @Put(':id')
-  updatePut(@Param('id') id: number, @Body() updateGrupoLaborDto: UpdateGrupoDto) {
+  updatePut(@Param('id', ParseIntPipe) id: number, @Body() updateGrupoLaborDto: UpdateGrupoDto) {
     return this.gruposLaborService.update(id, updateGrupoLaborDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.gruposLaborService.remove(id);
   }
 } 

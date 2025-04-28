@@ -1,4 +1,5 @@
-import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString, IsEnum } from 'class-validator';
+import { TipoRegistro } from '../../entities/registro-labor.entity';
 
 export class CreateRegistroLaborDto {
   @IsNotEmpty()
@@ -64,4 +65,8 @@ export class CreateRegistroLaborDto {
   @IsOptional()
   @IsNumber()
   cantidadLote?: number;
+
+  @IsNotEmpty()
+  @IsEnum(TipoRegistro)
+  tipoRegistro: TipoRegistro;
 }

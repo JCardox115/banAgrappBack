@@ -1,8 +1,9 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { Empleado } from './empleado.entity';
 import { Lote } from './lote.entity';
 import { CentroCosto } from './centro-costo.entity';
 import { ConceptoPagoGrupoLabor } from './concepto-pago-grupo-labor.entity';
+import { RegistroLaborDetalle } from './registro-labor-detalle.entity';
 
 export enum TipoRegistro {
   POR_LABOR = 'POR_LABOR',
@@ -16,6 +17,9 @@ export class RegistroLabor {
 
   @ManyToOne(() => Empleado)
   empleado: Empleado;
+
+  @Column()
+  conceptoPagoGrupoLaborId: number;
 
   @ManyToOne(() => ConceptoPagoGrupoLabor)
   conceptoPagoGrupoLabor: ConceptoPagoGrupoLabor;
@@ -68,6 +72,9 @@ export class RegistroLabor {
     default: TipoRegistro.POR_EMPLEADO
   })
   tipoRegistro: TipoRegistro;
+
+  @OneToMany(() => RegistroLaborDetalle, detalle => detalle.registroLabor)
+  detalles: RegistroLaborDetalle[];
 
   @CreateDateColumn()
   createdAt: Date;

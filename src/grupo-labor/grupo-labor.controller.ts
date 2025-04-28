@@ -19,9 +19,12 @@ export class GrupoLaborController {
     return this.laborGrupoLaborService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.laborGrupoLaborService.findOne(+id);
+  @Get('by-grupo-labor/:idGrupo/:idLabor')
+  findByGrupoAndLabor(
+    @Param('idGrupo') idGrupo: string,
+    @Param('idLabor') idLabor: string
+  ) {
+    return this.laborGrupoLaborService.findByGrupoAndLabor(+idGrupo, +idLabor);
   }
 
   @Get('by-grupo/:idGrupoLabor')
@@ -32,6 +35,11 @@ export class GrupoLaborController {
   @Get('by-labor/:idLabor')
   findByLabor(@Param('idLabor') idLabor: string) {
     return this.laborGrupoLaborService.findByLabor(+idLabor);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.laborGrupoLaborService.findOne(+id);
   }
 
   @Patch(':id')

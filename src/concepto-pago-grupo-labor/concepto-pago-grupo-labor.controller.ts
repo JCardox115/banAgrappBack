@@ -24,7 +24,7 @@ export class ConceptoPagoGrupoLaborController {
     return this.conceptoPagoGrupoLaborService.findOne(+id);
   }
 
-  @Get('by-labor-grupo/:idGrupoLabor')
+  @Get('by-grupo-labor/:idGrupoLabor')
   findByLaborGrupo(@Param('idGrupoLabor') idGrupoLabor: string) {
     return this.conceptoPagoGrupoLaborService.findByLaborGrupo(+idGrupoLabor);
   }

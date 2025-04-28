@@ -54,6 +54,13 @@ export class GrupoLaborService {
     });
   }
 
+  async findByGrupoAndLabor(idGrupo: number, idLabor: number): Promise<GrupoLabor[]> {
+    return this.laborGrupoLaborRepository.find({
+      where: { idGrupo, idLabor },
+      relations: ['labor', 'grupo'],
+    });
+  }
+
   async update(id: number, updateGrupoLaborDto: UpdateGrupoLaborDto): Promise<GrupoLabor> {
     const entity = await this.findOne(id);
     this.laborGrupoLaborRepository.merge(entity, updateGrupoLaborDto);

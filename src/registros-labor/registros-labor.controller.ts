@@ -14,6 +14,14 @@ export class RegistrosLaborController {
     return this.registrosLaborService.create(createRegistroLaborDto);
   }
 
+  @Post('with-detalles')
+  createWithDetalles(
+    @Body('registro') createRegistroLaborDto: CreateRegistroLaborDto,
+    @Body('detalles') detalles: any[]
+  ) {
+    return this.registrosLaborService.createWithDetalles(createRegistroLaborDto, detalles);
+  }
+
   @Post('bulk')
   createBulk(@Body('registros') registros: CreateRegistroLaborDto[]) {
     return this.registrosLaborService.createBulk(registros);
@@ -37,6 +45,15 @@ export class RegistrosLaborController {
   @Put(':id')
   updatePut(@Param('id') id: number, @Body() updateRegistroLaborDto: UpdateRegistroLaborDto) {
     return this.registrosLaborService.update(id, updateRegistroLaborDto);
+  }
+
+  @Patch(':id/with-detalles')
+  updateWithDetalles(
+    @Param('id') id: number,
+    @Body('registro') updateRegistroLaborDto: UpdateRegistroLaborDto,
+    @Body('detalles') detalles: any[]
+  ) {
+    return this.registrosLaborService.updateWithDetalles(id, updateRegistroLaborDto, detalles);
   }
 
   @Delete(':id')
