@@ -277,17 +277,17 @@ export class ReportesService {
       
       // Campos adicionales basados en el ejemplo real
       const punto = '.';
-      const na1 = '1.00'; // Se muestra como 1.00 en el ejemplo
+      const recargoBase = '1.00'; // Se muestra como 1.00 en el ejemplo
       const l = 'L'; // Literal L separador
-    const na2 = areaRealizada || '0.00000'; // Era 'NA2' antes, ahora usamos areaRealizada
-    const na3 = 'NA'; // Aparece como 3120 en el ejemplo
-      
+      const na2 = areaRealizada || '0.00000'; // Era 'NA2' antes, ahora usamos areaRealizada
+      const na3 = 'NA'; // Aparece como 3120 en el ejemplo
+        
       // Primera parte de la línea con comas como separador (hasta centro de costo)
       const parte1 = [
         codigoEmpleado.replace(' ', ''),
         numeroDocumento,
         nombreCompleto,
-      recargo,
+        '0',
         valorConcepto,
         codigoLaborFormateado,
         cantidadLabor,
@@ -295,7 +295,7 @@ export class ReportesService {
         punto,
         codigoFinca,
         codigoCentroCosto,
-        na1
+        detalle?.recargo! > 0 ? recargo: recargoBase
       ].join(',');
       
       // Segunda parte sin comas (horas, L, lote, semanas)
