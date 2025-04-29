@@ -74,7 +74,21 @@ export class ReportesService {
   }
 
   private transformarRegistroParaVistaPrevia(registro: any, detalle?: any): any {
-    const fecha = new Date(registro.fecha);
+    // Formatear fecha correctamente, evitando problemas de zona horaria
+    let fecha: Date;
+    
+    if (typeof registro.fecha === 'string') {
+      // Si la fecha viene como string, extraemos año, mes y día directamente
+      const fechaStr = registro.fecha as string;
+      const [year, month, day] = fechaStr.split('T')[0].split('-').map(Number);
+      fecha = new Date(year, month - 1, day);
+    } else if (registro.fecha instanceof Date) {
+      // Si ya es un objeto Date, lo usamos directamente
+      fecha = registro.fecha;
+    } else {
+      // Valor por defecto si no hay fecha
+      fecha = new Date();
+    }
     
     // Obtener información del empleado
     const empleadoCodigo = registro.empleado.codigo || '';
@@ -105,7 +119,7 @@ export class ReportesService {
       semanas = this.convertirANumero(detalle.semanasEjecutadas);
       area = this.convertirANumero(detalle.area);
     } else {
-      // Si no hay detalle, usar la información del registro principal
+      // Si no hay detalle, generar una sola entrada con el registro principal
       lote = registro.lote?.numLote || '';
       cantidad = this.convertirANumero(registro.cantidad);
       semanas = this.convertirANumero(registro.semanasEjecutadas);
@@ -125,7 +139,8 @@ export class ReportesService {
       
       empleadoCodigo,
       empleadoNombre,
-      fecha: fecha.toISOString().split('T')[0],
+      // Formatear fecha como YYYY-MM-DD evitando problemas de zona horaria
+      fecha: `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getDate().toString().padStart(2, '0')}`,
       laborCodigo,
       laborDescripcion,
       cantidad,
@@ -219,23 +234,38 @@ export class ReportesService {
   }
 
   private generarLineaReporte(registro: RegistroLabor, detalle?: RegistroLaborDetalle): string {
-      // Formatear fecha a DD/MM/YYYY
-      const fecha = new Date(registro.fecha);
-      const fechaFormateada = `${fecha.getDate().toString().padStart(2, '0')}/${(fecha.getMonth() + 1).toString().padStart(2, '0')}/${fecha.getFullYear()}`;
-      
-      // Formatear código del empleado y nombre completo
-      const codigoEmpleado = registro.empleado.codigo || '';
-      const numeroDocumento = registro.empleado.numDocumento || '';
-      const nombreCompleto = `${registro.empleado.nombres || ''} ${registro.empleado.apellidos || ''}`;
-      
-      // Obtener código de concepto de pago y valor
-      const codigoConcepto = registro.conceptoPagoGrupoLabor?.conceptoPago?.codigo || '0';
-      const valorConcepto = registro.conceptoPagoGrupoLabor?.conceptoPago?.precio?.toString() || '0';
-      
-      // Información de la labor (añadiendo 'LC' al código)
-      const laborCodigo = registro.conceptoPagoGrupoLabor?.conceptoPago?.codigo || '';
-      const codigoLaborFormateado = +laborCodigo < 100 ? `LC0${laborCodigo}` : `LC${laborCodigo}`;
-      
+    // Formatear fecha a DD/MM/YYYY correctamente, evitando problemas de zona horaria
+    // Obtenemos los componentes de la fecha directamente para evitar conversiones inesperadas
+    let fecha: Date;
+    
+    if (typeof registro.fecha === 'string') {
+      // Si la fecha viene como string, extraemos año, mes y día directamente
+      const fechaStr = registro.fecha as string;
+      const [year, month, day] = fechaStr.split('T')[0].split('-').map(Number);
+      fecha = new Date(year, month - 1, day);
+    } else if (registro.fecha instanceof Date) {
+      // Si ya es un objeto Date, lo usamos directamente
+      fecha = registro.fecha;
+    } else {
+      // Valor por defecto si no hay fecha
+      fecha = new Date();
+    }
+    
+    const fechaFormateada = `${fecha.getDate().toString().padStart(2, '0')}/${(fecha.getMonth() + 1).toString().padStart(2, '0')}/${fecha.getFullYear()}`;
+    
+    // Formatear código del empleado y nombre completo
+    const codigoEmpleado = registro.empleado.codigo || '';
+    const numeroDocumento = registro.empleado.numDocumento || '';
+    const nombreCompleto = `${registro.empleado.nombres || ''} ${registro.empleado.apellidos || ''}`;
+    
+    // Obtener código de concepto de pago y valor
+    const codigoConcepto = registro.conceptoPagoGrupoLabor?.conceptoPago?.codigo || '0';
+    const valorConcepto = registro.conceptoPagoGrupoLabor?.conceptoPago?.precio?.toString() || '0';
+    
+    // Información de la labor (añadiendo 'LC' al código)
+    const laborCodigo = registro.conceptoPagoGrupoLabor?.conceptoPago?.codigo || '';
+    const codigoLaborFormateado = +laborCodigo < 100 ? `LC0${laborCodigo}` : `LC${laborCodigo}`;
+    
     // Cantidad y detalles - AHORA EXTRAÍDOS DEL DETALLE SI EXISTE
     let cantidadLabor = '0.00000';
     
@@ -250,14 +280,14 @@ export class ReportesService {
         ? registro.cantidad.toFixed(5) 
         : '0.00000';
     }
-      
-      // Información de la finca y centro de costo
+    
+    // Información de la finca y centro de costo
     const codigoFinca = registro.empleado.finca?.codigo || '';
-      const codigoCentroCosto = registro.centroCosto?.codigo || '';
-      
-      // Horas trabajadas
-      const horas = registro.horas?.toString() || '0.00';
-      
+    const codigoCentroCosto = registro.centroCosto?.codigo || '';
+    
+    // Horas trabajadas
+    const horas = registro.horas?.toString() || '0.00';
+    
     // Semanas ejecutadas - AHORA EXTRAYENDO DEL DETALLE SI EXISTE
     const semanas = detalle?.semanasEjecutadas?.toString() || registro.semanasEjecutadas?.toString() || '0';
     
@@ -274,39 +304,39 @@ export class ReportesService {
     
     // Área realizada - EXTRAÍDA DEL DETALLE
     const areaRealizada = detalle?.areaRealizada?.toString() || '0.00000';
-      
-      // Campos adicionales basados en el ejemplo real
-      const punto = '.';
-      const recargoBase = '1.00'; // Se muestra como 1.00 en el ejemplo
-      const l = 'L'; // Literal L separador
-      const na2 = areaRealizada || '0.00000'; // Era 'NA2' antes, ahora usamos areaRealizada
-      const na3 = 'NA'; // Aparece como 3120 en el ejemplo
-        
-      // Primera parte de la línea con comas como separador (hasta centro de costo)
-      const parte1 = [
-        codigoEmpleado.replace(' ', ''),
-        numeroDocumento,
-        nombreCompleto,
-        '0',
-        valorConcepto,
-        codigoLaborFormateado,
-        cantidadLabor,
-        fechaFormateada,
-        punto,
-        codigoFinca,
-        codigoCentroCosto,
-        detalle?.recargo! > 0 ? recargo: recargoBase
-      ].join(',');
-      
-      // Segunda parte sin comas (horas, L, lote, semanas)
-      const parte2 = `${horas}  ${l}    ${codigoLote}     ${semanas}    ${na2}`;
-      
-      // Tercera parte con comas
-      // const parte3 = [na3].join(',');
-      
-      // Unir todas las partes
-      const linea = `${parte1},${parte2},${na3}`;
-      
+    
+    // Campos adicionales basados en el ejemplo real
+    const punto = '.';
+    const na1 = '1.00'; // Se muestra como 1.00 en el ejemplo
+    const l = 'L'; // Literal L separador
+    const na2 = areaRealizada || '0.00000'; // Era 'NA2' antes, ahora usamos areaRealizada
+    const na3 = 'NA'; // Aparece como 3120 en el ejemplo
+    
+    // Primera parte de la línea con comas como separador (hasta centro de costo)
+    const parte1 = [
+      codigoEmpleado.replace(' ', ''),
+      numeroDocumento,
+      nombreCompleto,
+      '0',
+      valorConcepto,
+      codigoLaborFormateado,
+      cantidadLabor,
+      fechaFormateada,
+      punto,
+      codigoFinca,
+      codigoCentroCosto,
+      detalle?.recargo! > 0 ? recargo: na1
+    ].join(',');
+    
+    // Segunda parte sin comas (horas, L, lote, semanas)
+    const parte2 = `${horas}  ${l}    ${codigoLote}     ${semanas}    ${na2}`;
+    
+    // Tercera parte con comas
+    // const parte3 = [na3].join(',');
+    
+    // Unir todas las partes
+    const linea = `${parte1},${parte2},${na3}`;
+    
     return linea;
   }
 
