@@ -119,6 +119,10 @@ export class ReportesService {
     const horas = this.convertirANumero(registro.horas);
     
     return {
+      // Añadir los IDs para actualizar los registros posteriormente
+      id: detalle ? detalle.id : null,
+      registroLaborId: detalle ? detalle.registroLaborId : registro.id,
+      
       empleadoCodigo,
       empleadoNombre,
       fecha: fecha.toISOString().split('T')[0],
@@ -304,5 +308,41 @@ export class ReportesService {
       const linea = `${parte1},${parte2},${na3}`;
       
     return linea;
+  }
+
+  /**
+   * Actualiza los campos de semanas ejecutadas y recargo de un detalle de registro de labor
+   * @param id ID del detalle a actualizar
+   * @param registroLaborId ID del registro labor al que pertenece el detalle
+   * @param semanas Número de semanas ejecutadas
+   * @param recargo Valor del recargo
+   * @returns El detalle actualizado
+   */
+  async actualizarDetalleRegistro(
+    id: number, 
+    registroLaborId: number, 
+    semanas?: number, 
+    recargo?: number
+  ): Promise<RegistroLaborDetalle> {
+    // Buscar el detalle de registro labor
+    const detalle = await this.registroLaborDetalleRepository.findOne({
+      where: { id, registroLaborId }
+    });
+    
+    if (!detalle) {
+      throw new Error(`Detalle con ID ${id} no encontrado para el registro labor ${registroLaborId}`);
+    }
+    
+    // Actualizar solo los campos proporcionados
+    if (semanas !== undefined) {
+      detalle.semanasEjecutadas = semanas;
+    }
+    
+    if (recargo !== undefined) {
+      detalle.recargo = recargo;
+    }
+    
+    // Guardar los cambios
+    return this.registroLaborDetalleRepository.save(detalle);
   }
 } 

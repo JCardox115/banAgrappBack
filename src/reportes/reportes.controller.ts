@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Res, HttpStatus, Logger } from '@nestjs/common';
+import { Controller, Post, Body, Res, HttpStatus, Logger, Patch } from '@nestjs/common';
 import { ReportesService } from './reportes.service';
 import { Response } from 'express';
 
@@ -101,6 +101,48 @@ export class ReportesController {
         message: 'Error al generar el reporte',
         error: error.message,
       });
+    }
+  }
+  
+  @Patch('actualizar-detalle')
+  async actualizarDetalleRegistro(
+    @Body() updateData: {
+      id: number;
+      registroLaborId: number;
+      semanas?: number;
+      recargo?: number;
+    }
+  ) {
+    try {
+      const { id, registroLaborId, semanas, recargo } = updateData;
+      
+      if (!id || !registroLaborId) {
+        return {
+          success: false,
+          message: 'El ID del detalle y el ID del registro labor son obligatorios'
+        };
+      }
+      
+      this.logger.log(`Actualizando detalle de registro labor: id=${id}, registroLaborId=${registroLaborId}, semanas=${semanas}, recargo=${recargo}`);
+      
+      const detalle = await this.reportesService.actualizarDetalleRegistro(
+        id,
+        registroLaborId,
+        semanas,
+        recargo
+      );
+      
+      return {
+        success: true,
+        data: detalle
+      };
+    } catch (error) {
+      this.logger.error('Error actualizando detalle de registro labor:', error);
+      return {
+        success: false,
+        message: 'Error al actualizar el detalle',
+        error: error.message
+      };
     }
   }
 } 
