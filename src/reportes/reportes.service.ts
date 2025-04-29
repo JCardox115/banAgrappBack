@@ -215,23 +215,23 @@ export class ReportesService {
   }
 
   private generarLineaReporte(registro: RegistroLabor, detalle?: RegistroLaborDetalle): string {
-    // Formatear fecha a DD/MM/YYYY
-    const fecha = new Date(registro.fecha);
-    const fechaFormateada = `${fecha.getDate().toString().padStart(2, '0')}/${(fecha.getMonth() + 1).toString().padStart(2, '0')}/${fecha.getFullYear()}`;
-    
-    // Formatear código del empleado y nombre completo
-    const codigoEmpleado = registro.empleado.codigo || '';
-    const numeroDocumento = registro.empleado.numDocumento || '';
-    const nombreCompleto = `${registro.empleado.nombres || ''} ${registro.empleado.apellidos || ''}`;
-    
-    // Obtener código de concepto de pago y valor
-    const codigoConcepto = registro.conceptoPagoGrupoLabor?.conceptoPago?.codigo || '0';
-    const valorConcepto = registro.conceptoPagoGrupoLabor?.conceptoPago?.precio?.toString() || '0';
-    
-    // Información de la labor (añadiendo 'LC' al código)
-    const laborCodigo = registro.conceptoPagoGrupoLabor?.conceptoPago?.codigo || '';
-    const codigoLaborFormateado = +laborCodigo < 100 ? `LC0${laborCodigo}` : `LC${laborCodigo}`;
-    
+      // Formatear fecha a DD/MM/YYYY
+      const fecha = new Date(registro.fecha);
+      const fechaFormateada = `${fecha.getDate().toString().padStart(2, '0')}/${(fecha.getMonth() + 1).toString().padStart(2, '0')}/${fecha.getFullYear()}`;
+      
+      // Formatear código del empleado y nombre completo
+      const codigoEmpleado = registro.empleado.codigo || '';
+      const numeroDocumento = registro.empleado.numDocumento || '';
+      const nombreCompleto = `${registro.empleado.nombres || ''} ${registro.empleado.apellidos || ''}`;
+      
+      // Obtener código de concepto de pago y valor
+      const codigoConcepto = registro.conceptoPagoGrupoLabor?.conceptoPago?.codigo || '0';
+      const valorConcepto = registro.conceptoPagoGrupoLabor?.conceptoPago?.precio?.toString() || '0';
+      
+      // Información de la labor (añadiendo 'LC' al código)
+      const laborCodigo = registro.conceptoPagoGrupoLabor?.conceptoPago?.codigo || '';
+      const codigoLaborFormateado = +laborCodigo < 100 ? `LC0${laborCodigo}` : `LC${laborCodigo}`;
+      
     // Cantidad y detalles - AHORA EXTRAÍDOS DEL DETALLE SI EXISTE
     let cantidadLabor = '0.00000';
     
@@ -246,14 +246,14 @@ export class ReportesService {
         ? registro.cantidad.toFixed(5) 
         : '0.00000';
     }
-    
-    // Información de la finca y centro de costo
+      
+      // Información de la finca y centro de costo
     const codigoFinca = registro.empleado.finca?.codigo || '';
-    const codigoCentroCosto = registro.centroCosto?.codigo || '';
-    
-    // Horas trabajadas
-    const horas = registro.horas?.toString() || '0.00';
-    
+      const codigoCentroCosto = registro.centroCosto?.codigo || '';
+      
+      // Horas trabajadas
+      const horas = registro.horas?.toString() || '0.00';
+      
     // Semanas ejecutadas - AHORA EXTRAYENDO DEL DETALLE SI EXISTE
     const semanas = detalle?.semanasEjecutadas?.toString() || registro.semanasEjecutadas?.toString() || '0';
     
@@ -270,39 +270,39 @@ export class ReportesService {
     
     // Área realizada - EXTRAÍDA DEL DETALLE
     const areaRealizada = detalle?.areaRealizada?.toString() || '0.00000';
-    
-    // Campos adicionales basados en el ejemplo real
-    const punto = '.';
-    const na1 = '1.00'; // Se muestra como 1.00 en el ejemplo
-    const l = 'L'; // Literal L separador
+      
+      // Campos adicionales basados en el ejemplo real
+      const punto = '.';
+      const na1 = '1.00'; // Se muestra como 1.00 en el ejemplo
+      const l = 'L'; // Literal L separador
     const na2 = areaRealizada || '0.00000'; // Era 'NA2' antes, ahora usamos areaRealizada
     const na3 = 'NA'; // Aparece como 3120 en el ejemplo
-    
-    // Primera parte de la línea con comas como separador (hasta centro de costo)
-    const parte1 = [
-      codigoEmpleado.replace(' ', ''),
-      numeroDocumento,
-      nombreCompleto,
+      
+      // Primera parte de la línea con comas como separador (hasta centro de costo)
+      const parte1 = [
+        codigoEmpleado.replace(' ', ''),
+        numeroDocumento,
+        nombreCompleto,
       recargo,
-      valorConcepto,
-      codigoLaborFormateado,
-      cantidadLabor,
-      fechaFormateada,
-      punto,
-      codigoFinca,
-      codigoCentroCosto,
-      na1
-    ].join(',');
-    
-    // Segunda parte sin comas (horas, L, lote, semanas)
-    const parte2 = `${horas}  ${l}    ${codigoLote}     ${semanas}    ${na2}`;
-    
-    // Tercera parte con comas
-    // const parte3 = [na3].join(',');
-    
-    // Unir todas las partes
-    const linea = `${parte1},${parte2},${na3}`;
-    
+        valorConcepto,
+        codigoLaborFormateado,
+        cantidadLabor,
+        fechaFormateada,
+        punto,
+        codigoFinca,
+        codigoCentroCosto,
+        na1
+      ].join(',');
+      
+      // Segunda parte sin comas (horas, L, lote, semanas)
+      const parte2 = `${horas}  ${l}    ${codigoLote}     ${semanas}    ${na2}`;
+      
+      // Tercera parte con comas
+      // const parte3 = [na3].join(',');
+      
+      // Unir todas las partes
+      const linea = `${parte1},${parte2},${na3}`;
+      
     return linea;
   }
 } 
