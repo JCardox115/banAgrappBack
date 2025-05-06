@@ -1,6 +1,8 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn, JoinColumn } from 'typeorm';
 import { RegistroLabor } from './registro-labor.entity';
 import { Lote } from './lote.entity';
+import { IsOptional } from 'class-validator';
+import { DefaultValuePipe } from '@nestjs/common';
 
 @Entity('registros_labor_detalle')
 export class RegistroLaborDetalle {
@@ -21,10 +23,11 @@ export class RegistroLaborDetalle {
   loteId: number;
 
   @Column({ nullable: true })
-  loteNumero: string;
+  loteNumero?: string;
 
-  @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  area: number;
+  @Column('decimal', {default: 0.0})
+  @IsOptional()
+  area?: number;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
   areaRealizada: number;

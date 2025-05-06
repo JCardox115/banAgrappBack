@@ -1,11 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { RegistroLabor } from '../entities/registro-labor.entity';
 import { RegistroLaborDetalle } from '../entities/registro-labor-detalle.entity';
+import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
 
 @Injectable()
 export class ReportesService {
+  private readonly logger = new Logger(ReportesService.name);
+  
   constructor(
     @InjectRepository(RegistroLabor)
     private registroLaborRepository: Repository<RegistroLabor>,
@@ -25,7 +28,8 @@ export class ReportesService {
       .leftJoinAndSelect('registro.centroCosto', 'centroCosto')
       .leftJoinAndSelect('registro.detalles', 'detalles')
       .leftJoinAndSelect('detalles.lote', 'loteDetalle')
-      .leftJoinAndSelect('registro.lote', 'lote');
+      .leftJoinAndSelect('registro.lote', 'lote')
+
     
     // Aplicar los filtros solo si se proporcionan
     if (fincaId) {
@@ -57,8 +61,8 @@ export class ReportesService {
   
     // Transformar los registros para la vista previa
     const registrosTransformados: any[] = [];
-    
     for (const registro of registros) {
+      // this.logger.log(JSON.stringify(registro));
       // Si el registro tiene detalles, generar una entrada por cada detalle
       if (registro.detalles && registro.detalles.length > 0) {
         for (const detalle of registro.detalles) {
@@ -71,103 +75,6 @@ export class ReportesService {
     }
     
     return registrosTransformados;
-  }
-
-  private transformarRegistroParaVistaPrevia(registro: any, detalle?: any): any {
-    // Formatear fecha correctamente, evitando problemas de zona horaria
-    let fecha: Date;
-    
-    if (typeof registro.fecha === 'string') {
-      // Si la fecha viene como string, extraemos año, mes y día directamente
-      const fechaStr = registro.fecha as string;
-      const [year, month, day] = fechaStr.split('T')[0].split('-').map(Number);
-      fecha = new Date(year, month - 1, day);
-    } else if (registro.fecha instanceof Date) {
-      // Si ya es un objeto Date, lo usamos directamente
-      fecha = registro.fecha;
-    } else {
-      // Valor por defecto si no hay fecha
-      fecha = new Date();
-    }
-    
-    // Obtener información del empleado
-    const empleadoCodigo = registro.empleado.codigo || '';
-    const empleadoNombre = `${registro.empleado.nombres || ''} ${registro.empleado.apellidos || ''}`;
-    
-    // Información de la labor y concepto de pago
-    const laborCodigo = registro.conceptoPagoGrupoLabor?.grupoLabor?.labor?.codigo || '';
-    const laborDescripcion = registro.conceptoPagoGrupoLabor?.grupoLabor?.labor?.descripcion || '';
-    
-    // Valores y cantidades - asegurar que sea número
-    const valorUnitario = this.convertirANumero(registro.valorUnitario);
-    
-    // Datos del centro de costo
-    const centroCosto = registro.centroCosto?.descripcion || '';
-    
-    // Información del lote y cantidades
-    let lote = '';
-    let cantidad = 0;
-    let areaRealizada = 0;
-    let semanas = 0;
-    let area = 0;
-    
-    if (detalle) {
-      // Si se proporciona detalle, usar la información del detalle
-      lote = detalle.lote?.numLote || '';
-      cantidad = this.convertirANumero(detalle.cantidad);
-      areaRealizada = this.convertirANumero(detalle.areaRealizada);
-      semanas = this.convertirANumero(detalle.semanasEjecutadas);
-      area = this.convertirANumero(detalle.area);
-    } else {
-      // Si no hay detalle, generar una sola entrada con el registro principal
-      lote = registro.lote?.numLote || '';
-      cantidad = this.convertirANumero(registro.cantidad);
-      semanas = this.convertirANumero(registro.semanasEjecutadas);
-    }
-    
-    // Calcular valor total
-    const valorTotal = valorUnitario * cantidad;
-    
-    // Recargo y horas
-    const recargo = detalle ? this.convertirANumero(detalle.recargo) : this.convertirANumero(registro.recargo);
-    const horas = this.convertirANumero(registro.horas);
-    
-    return {
-      // Añadir los IDs para actualizar los registros posteriormente
-      id: detalle ? detalle.id : null,
-      registroLaborId: detalle ? detalle.registroLaborId : registro.id,
-      
-      empleadoCodigo,
-      empleadoNombre,
-      // Formatear fecha como YYYY-MM-DD evitando problemas de zona horaria
-      fecha: `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getDate().toString().padStart(2, '0')}`,
-      laborCodigo,
-      laborDescripcion,
-      cantidad,
-      valorUnitario,
-      valorTotal,
-      centroCosto,
-      lote,
-      semanas,
-      horas,
-      area,
-      areaRealizada,
-      recargo
-    };
-  }
-
-  // Método para convertir cualquier valor a número
-  private convertirANumero(valor: any): number {
-    if (valor === null || valor === undefined || valor === '') {
-      return 0;
-    }
-    
-    if (typeof valor === 'number') {
-      return valor;
-    }
-    
-    const numero = Number(valor);
-    return isNaN(numero) ? 0 : numero;
   }
 
   async generateTxtReport(empleado?: string, fincaId?: number, fechaDesde?: string, fechaHasta?: string, laborCodigo?: string): Promise<string> {
@@ -232,6 +139,105 @@ export class ReportesService {
   
     return reportContent || 'No hay datos para el reporte en el período seleccionado.';
   }
+
+
+  private transformarRegistroParaVistaPrevia(registro: any, detalle?: any): any {
+    // Formatear fecha correctamente, evitando problemas de zona horaria
+    let fecha: Date;
+    
+    if (typeof registro.fecha === 'string') {
+      // Si la fecha viene como string, extraemos año, mes y día directamente
+      const fechaStr = registro.fecha as string;
+      const [year, month, day] = fechaStr.split('T')[0].split('-').map(Number);
+      fecha = new Date(year, month - 1, day);
+    } else if (registro.fecha instanceof Date) {
+      // Si ya es un objeto Date, lo usamos directamente
+      fecha = registro.fecha;
+    } else {
+      // Valor por defecto si no hay fecha
+      fecha = new Date();
+    }
+    
+    // Obtener información del empleado
+    const empleadoCodigo = registro.empleado.codigo || '';
+    const empleadoNombre = `${registro.empleado.nombres || ''} ${registro.empleado.apellidos || ''}`;
+    
+    // Información de la labor y concepto de pago
+    const laborCodigo = registro.conceptoPagoGrupoLabor?.grupoLabor?.labor?.codigo || '';
+    const laborDescripcion = registro.conceptoPagoGrupoLabor?.grupoLabor?.labor?.descripcion || '';
+    
+    // Valores y cantidades - asegurar que sea número
+    const valorUnitario = this.convertirANumero(registro.valorUnitario);
+    
+    // Datos del centro de costo
+    const centroCosto = registro.centroCosto?.descripcion || '';
+    
+    // Información del lote y cantidades
+    let lote = '';
+    let cantidad = 0;
+    let areaRealizada = 0;
+    let semanas = 0;
+    let area = 0;
+    
+    if (detalle) {
+      // Si se proporciona detalle, usar la información del detalle
+      lote = detalle.lote?.numLote || '';
+      cantidad = this.convertirANumero(detalle.cantidad);
+      areaRealizada = this.convertirANumero(detalle.areaRealizada);
+      semanas = this.convertirANumero(detalle.semanasEjecutadas);
+      area = this.convertirANumero(detalle.area);
+    } else {
+      // Si no hay detalle, generar una sola entrada con el registro principal
+      lote = registro.lote?.numLote || '';
+      cantidad = this.convertirANumero(registro.cantidad);
+      semanas = this.convertirANumero(registro.semanasEjecutadas);
+    }
+    
+    // Calcular valor total
+    const valorTotal = valorUnitario * cantidad;
+    
+    // Recargo y horas
+    const recargo = detalle ? this.convertirANumero(detalle.recargo) : this.convertirANumero(registro.recargo);
+    const horas = this.convertirANumero(registro.horas);
+    
+    return {
+      // Añadir los IDs para actualizar los registros posteriormente
+      id: detalle ? detalle.id : registro.id,
+      registroLaborId: detalle ? detalle.registroLaborId : registro.id,
+      empleadoCodigo,
+      empleadoNombre,
+      // Formatear fecha como YYYY-MM-DD evitando problemas de zona horaria
+      fecha: `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getDate().toString().padStart(2, '0')}`,
+      laborCodigo,
+      laborDescripcion,
+      cantidad,
+      valorUnitario,
+      valorTotal,
+      centroCosto,
+      lote,
+      semanas,
+      horas,
+      area,
+      areaRealizada,
+      recargo
+    };
+  }
+
+  // Método para convertir cualquier valor a número
+  private convertirANumero(valor: any): number {
+    if (valor === null || valor === undefined || valor === '') {
+      return 0;
+    }
+    
+    if (typeof valor === 'number') {
+      return valor;
+    }
+    
+    const numero = Number(valor);
+    return isNaN(numero) ? 0 : numero;
+  }
+
+
 
   private generarLineaReporte(registro: RegistroLabor, detalle?: RegistroLaborDetalle): string {
     // Formatear fecha a DD/MM/YYYY correctamente, evitando problemas de zona horaria
@@ -353,14 +359,28 @@ export class ReportesService {
     registroLaborId: number, 
     semanas?: number, 
     recargo?: number
-  ): Promise<RegistroLaborDetalle> {
+  ): Promise<any> {
     // Buscar el detalle de registro labor
     const detalle = await this.registroLaborDetalleRepository.findOne({
       where: { id, registroLaborId }
     });
     
     if (!detalle) {
-      throw new Error(`Detalle con ID ${id} no encontrado para el registro labor ${registroLaborId}`);
+      this.logger.log(`Detalle con ID ${id} no encontrado se editara en tabla de registros, para el registro ${registroLaborId}`);
+
+      const registroLabor = await this.registroLaborRepository.findOne({
+        where: { id: registroLaborId }
+      });
+
+      if(registroLabor) {
+        registroLabor.semanasEjecutadas = semanas;
+        registroLabor.recargo = recargo;
+        return this.registroLaborRepository.save(registroLabor);
+      }
+      else {
+        throw new Error(`No se encontro un detalle ni un  encabezado con ID ${id}`)
+      }
+      return;
     }
     
     // Actualizar solo los campos proporcionados

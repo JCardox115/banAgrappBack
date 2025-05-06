@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, CreateDateColumn, UpdateDateColumn, JoinColumn } from 'typeorm';
 import { UnidadMedida } from './unidad-medida.entity';
 import { IsNumber, IsOptional } from 'class-validator';
 
@@ -21,6 +21,7 @@ export class ConceptoPago {
 
   @ManyToOne(() => UnidadMedida)
   unidadMedida: UnidadMedida;
+  @JoinColumn({ name: 'unidadMedidaId' })
 
   @Column('decimal', { precision: 10, scale: 2 })
   precio: number;

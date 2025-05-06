@@ -219,4 +219,32 @@ export class RegistrosLaborService {
       throw new NotFoundException(`Registro con ID ${id} no encontrado`);
     }
   }
+
+  async findByRangoFechas(fechaInicio: string, fechaFin: string, tipoRegistro?: string, fincaId?: number): Promise<RegistroLabor[]> {
+    const queryBuilder = this.registroRepository.createQueryBuilder('registro')
+      .leftJoinAndSelect('registro.empleado', 'empleado')
+      .leftJoinAndSelect('registro.conceptoPagoGrupoLabor', 'conceptoPagoGrupoLabor')
+      .leftJoinAndSelect('registro.centroCosto', 'centroCosto')
+      .leftJoinAndSelect('registro.lote', 'lote')
+      .leftJoinAndSelect('conceptoPagoGrupoLabor.conceptoPago', 'conceptoPago')
+      .leftJoinAndSelect('conceptoPagoGrupoLabor.grupoLabor', 'grupoLabor')
+      .leftJoinAndSelect('grupoLabor.labor', 'labor')
+      .leftJoinAndSelect('grupoLabor.grupo', 'grupo')
+      .leftJoinAndSelect('centroCosto.finca', 'finca')
+      .leftJoinAndSelect('registro.detalles', 'detalles')
+      .where('DATE(registro.fecha) BETWEEN :fechaInicio AND :fechaFin', { 
+        fechaInicio, 
+        fechaFin 
+      });
+
+    if (tipoRegistro) {
+      queryBuilder.andWhere('registro.tipoRegistro = :tipoRegistro', { tipoRegistro });
+    }
+
+    if (fincaId) {
+      queryBuilder.andWhere('finca.id = :fincaId', { fincaId });
+    }
+
+    return queryBuilder.getMany();
+  }
 } 

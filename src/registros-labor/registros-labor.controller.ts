@@ -32,6 +32,16 @@ export class RegistrosLaborController {
     return this.registrosLaborService.findAll(fincaId);
   }
 
+  @Get('by-fecha')
+  findByRangoFechas(
+    @Query('fechaInicio') fechaInicio: string,
+    @Query('fechaFin') fechaFin: string,
+    @Query('tipoRegistro') tipoRegistro?: string,
+    @Query('fincaId') fincaId?: number
+  ) {
+    return this.registrosLaborService.findByRangoFechas(fechaInicio, fechaFin, tipoRegistro, fincaId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.registrosLaborService.findOne(id);
@@ -60,4 +70,4 @@ export class RegistrosLaborController {
   remove(@Param('id') id: number) {
     return this.registrosLaborService.remove(id);
   }
-} 
+}

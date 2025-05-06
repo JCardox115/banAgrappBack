@@ -43,4 +43,10 @@ export class CreateEmpleadoDto {
 
   @IsBoolean()
   activo?: boolean; // Cambia esto a @IsBoolean() si es necesario
+
+  @IsOptional()
+  createdAt: Date;
+
+  @IsOptional()
+  updatedAt: Date;
 }

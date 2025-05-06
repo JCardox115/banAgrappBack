@@ -14,11 +14,11 @@ export class CreateRegistroLaborDetalleDto {
   loteNumero?: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 2 })
   area?: number;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 2 })
   areaRealizada?: number;
 
   @IsNotEmpty()
