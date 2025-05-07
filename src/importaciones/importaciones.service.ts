@@ -72,10 +72,10 @@ export class ImportacionesService {
           const cleanedItem = this.cleanNumericValues(item);
 
           // Validar campos requeridos
-          if (cleanedItem.codigo == 0 || !cleanedItem.descripcion) {
-            errors.push(`Registro inválido: código y descripción son requeridos`);
-            continue;
-          }
+          // if (cleanedItem.codigo == 0 || !cleanedItem.descripcion) {
+          //   errors.push(`Registro inválido: código y descripción son requeridos`);
+          //   continue;
+          // }
 
           // Verificar si ya existe un registro con el mismo código
           const existing = await repository.findOne({ where: { codigo: cleanedItem.codigo } });
