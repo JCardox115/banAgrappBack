@@ -12,9 +12,15 @@ export class LaboresService {
     private laboresRepository: Repository<Labor>,
   ) {}
 
-  async findAll(): Promise<Labor[]> {
+  async findAll(fincaId?: number): Promise<Labor[]> {
+    const where: any = { activo: true };
+    
+    if (fincaId) {
+      where.fincaId = fincaId;
+    }
+
     return this.laboresRepository.find({
-      where: { activo: true },
+      where,
       relations: ['lugarEjecucion']
     });
   }

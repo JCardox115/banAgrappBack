@@ -15,9 +15,13 @@ export class ConceptosPagoController {
   }
 
   @Get()
-  findAll(@Query('unidadMedidaId') unidadMedidaId?: string) {
-    if (unidadMedidaId) {
+  findAll(@Query('unidadMedidaId') unidadMedidaId?: string, @Query('fincaId') fincaId?: string) {
+    if (unidadMedidaId && fincaId) {
+      return this.conceptosPagoService.findByUnidadMedidaAndFinca(+unidadMedidaId, +fincaId);
+    } else if (unidadMedidaId) {
       return this.conceptosPagoService.findByUnidadMedida(+unidadMedidaId);
+    } else if (fincaId) {
+      return this.conceptosPagoService.findByFinca(+fincaId);
     }
     return this.conceptosPagoService.findAll();
   }

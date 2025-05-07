@@ -16,7 +16,7 @@ import { CorsMiddleware } from './middleware/cors.middleware';
 import { CorsController } from './controllers/cors.controller';
 import { TestController } from './controllers/test.controller';
 import { UsuariosModule } from './usuarios/usuarios.module';
-import { GruposLaborModule } from './grupos/grupos.module';
+import { GruposModule } from './grupos/grupos.module';
 import { TiposSueloModule } from './tipos-suelo/tipos-suelo.module';
 import { GrupoLaborModule } from './grupo-labor/grupo-labor.module';
 import { ConceptosPagoModule } from './conceptos-pago/conceptos-pago.module';
@@ -61,7 +61,7 @@ import { RegistrosLaborDetalleModule } from './registros-labor-detalle/registros
     UnidadMedidaModule,
     ReportesModule,
     UsuariosModule,
-    GruposLaborModule,
+    GruposModule,
     TiposSueloModule,
     GrupoLaborModule,
     ConceptosPagoModule,

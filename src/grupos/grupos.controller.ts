@@ -1,13 +1,13 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Put, ParseIntPipe, Optional } from '@nestjs/common';
-import { GruposLaborService } from './grupos.service';
+import { GruposService } from './grupos.service';
 import { CreateGrupoDto } from './dto/create-grupo.dto';
 import { UpdateGrupoDto } from './dto/update-grupo.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('grupos')
 @UseGuards(JwtAuthGuard)
-export class GruposLaborController {
-  constructor(private readonly gruposLaborService: GruposLaborService) {}
+export class GruposController {
+  constructor(private readonly gruposLaborService: GruposService) {}
 
   @Post()
   create(@Body() createGrupoDto: CreateGrupoDto) {

@@ -1,5 +1,6 @@
 import { IsNotEmpty, IsString, IsNumber, IsOptional, IsBoolean, IsObject, IsDate } from 'class-validator';
 import { UnidadMedida } from 'src/entities/unidad-medida.entity';
+import { Finca } from 'src/entities/finca.entity';
 
 export class CreateConceptoPagoDto {
 
@@ -24,6 +25,14 @@ export class CreateConceptoPagoDto {
   @IsOptional()
   @IsObject()
   unidadMedida: UnidadMedida;
+
+  @IsNotEmpty()
+  @IsNumber()
+  fincaId: number;
+
+  @IsOptional()
+  @IsObject()
+  finca: Finca;
 
   @IsOptional()
   createdAt: Date;

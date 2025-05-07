@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put, ParseIntPipe, Query } from '@nestjs/common';
 import { LaboresService } from './labores.service';
 import { CreateLaborDto } from './dto/create-labor.dto';
 import { UpdateLaborDto } from './dto/update-labor.dto';
@@ -16,8 +16,8 @@ export class LaboresController {
   }
 
   @Get()
-  findAll() {
-    return this.laboresService.findAll();
+  findAll(@Query('fincaId') fincaId?: number) {
+    return this.laboresService.findAll(fincaId);
   }
 
   @Get('grupo/:grupoId')

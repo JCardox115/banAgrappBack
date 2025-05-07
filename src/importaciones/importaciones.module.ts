@@ -12,6 +12,8 @@ import { ConceptoPago } from '../entities/concepto-pago.entity';
 import { ConceptoPagoGrupoLabor } from '../entities/concepto-pago-grupo-labor.entity';
 import { ImportacionesService } from './importaciones.service';
 import { ImportacionesController } from './importaciones.controller';
+import { Grupo } from 'src/entities/grupo.entity';
+import { Finca } from 'src/entities/finca.entity';
 
 @Module({
   imports: [
@@ -23,9 +25,11 @@ import { ImportacionesController } from './importaciones.controller';
       UnidadMedida,
       LugarEjecucion,
       TipoSuelo,
+      Grupo,
       GrupoLabor,
       ConceptoPago,
-      ConceptoPagoGrupoLabor
+      ConceptoPagoGrupoLabor,
+      Finca
     ])
   ],
   controllers: [ImportacionesController],

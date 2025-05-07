@@ -19,7 +19,7 @@ export class ConceptosPagoService {
 
   async findAll(): Promise<ConceptoPago[]> {
     return this.conceptoPagoRepository.find({
-      relations: ['unidadMedida'],
+      relations: ['unidadMedida', 'finca'],
       where: { activo: true },
     });
   }
@@ -27,7 +27,7 @@ export class ConceptosPagoService {
   async findOne(id: number): Promise<ConceptoPago> {
     const entity = await this.conceptoPagoRepository.findOne({
       where: { id },
-      relations: ['unidadMedida'],
+      relations: ['unidadMedida', 'finca'],
     });
     if (!entity) {
       throw new NotFoundException(`Concepto de Pago con ID ${id} no encontrado`);
@@ -41,7 +41,28 @@ export class ConceptosPagoService {
         unidadMedida: { id: unidadMedidaId },
         activo: true
       },
-      relations: ['unidadMedida'],
+      relations: ['unidadMedida', 'finca'],
+    });
+  }
+
+  async findByFinca(fincaId: number): Promise<ConceptoPago[]> {
+    return this.conceptoPagoRepository.find({
+      where: { 
+        fincaId,
+        activo: true
+      },
+      relations: ['unidadMedida', 'finca'],
+    });
+  }
+
+  async findByUnidadMedidaAndFinca(unidadMedidaId: number, fincaId: number): Promise<ConceptoPago[]> {
+    return this.conceptoPagoRepository.find({
+      where: { 
+        unidadMedida: { id: unidadMedidaId },
+        fincaId,
+        activo: true
+      },
+      relations: ['unidadMedida', 'finca'],
     });
   }
 

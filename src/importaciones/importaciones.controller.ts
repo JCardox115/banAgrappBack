@@ -3,7 +3,7 @@ import { ImportacionesService } from './importaciones.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('importaciones')
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class ImportacionesController {
   constructor(private readonly importacionesService: ImportacionesService) {}
 

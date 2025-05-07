@@ -11,6 +11,8 @@ import { TipoSuelo } from '../entities/tipo-suelo.entity';
 import { GrupoLabor } from '../entities/grupo-labor.entity';
 import { ConceptoPago } from '../entities/concepto-pago.entity';
 import { ConceptoPagoGrupoLabor } from '../entities/concepto-pago-grupo-labor.entity';
+import { Grupo } from 'src/entities/grupo.entity';
+import { Finca } from 'src/entities/finca.entity';
 
 @Injectable()
 export class ImportacionesService {
@@ -35,6 +37,10 @@ export class ImportacionesService {
     private conceptoPagoRepository: Repository<ConceptoPago>,
     @InjectRepository(ConceptoPagoGrupoLabor)
     private conceptoPagoGrupoLaborRepository: Repository<ConceptoPagoGrupoLabor>,
+    @InjectRepository(Grupo)
+    private grupoRepository: Repository<Grupo>,
+    @InjectRepository(Finca)
+    private fincaRepository: Repository<Finca>,
   ) {}
 
   private getRepository(entityName: string): Repository<any> {
@@ -48,7 +54,8 @@ export class ImportacionesService {
       'tipoSuelo': this.tipoSueloRepository,
       'grupoLabor': this.grupoLaborRepository,
       'conceptosPago': this.conceptoPagoRepository,
-      'conceptoPagoGrupoLabor': this.conceptoPagoGrupoLaborRepository
+      'conceptoPagoGrupoLabor': this.conceptoPagoGrupoLaborRepository,
+      'grupo': this.grupoRepository
     };
 
     const repository = repositories[entityName];
@@ -65,28 +72,47 @@ export class ImportacionesService {
       const errors: string[] = [];
       const validData: any[] = [];
 
+      // Cache para IDs de fincas, lugares de ejecución y unidades de medida
+      const fincasCache = new Map<string, number>();
+      const lugaresEjecucionCache = new Map<string, number>();
+      const unidadesMedidaCache = new Map<string, number>();
+
+      // Cargar datos de fincas, lugares de ejecución y unidades de medida en cache
+      await this.precargarCaches(fincasCache, lugaresEjecucionCache, unidadesMedidaCache);
+
       // Validar y preparar los datos
       for (const item of data) {
         try {
           // Limpiar y convertir valores numéricos
           const cleanedItem = this.cleanNumericValues(item);
+          
+          // Transformar valores especiales (S/N a booleanos, descripciones a IDs)
+          const transformedItem = await this.transformSpecialValues(
+            cleanedItem, 
+            fincasCache, 
+            lugaresEjecucionCache, 
+            unidadesMedidaCache,
+            errors
+          );
 
-          // Validar campos requeridos
-          // if (cleanedItem.codigo == 0 || !cleanedItem.descripcion) {
-          //   errors.push(`Registro inválido: código y descripción son requeridos`);
-          //   continue;
-          // }
+          if (!transformedItem) {
+            continue; // Saltar este ítem si la transformación falló
+          }
 
-          // Verificar si ya existe un registro con el mismo código
-          const existing = await repository.findOne({ where: { codigo: cleanedItem.codigo } });
+          const existing = await repository.findOne({ 
+            where: { 
+              fincaId: transformedItem.fincaId, 
+              codigo: transformedItem.codigo 
+            } 
+          });
+          
           if (existing) {
-            errors.push(`Registro con código ${cleanedItem.codigo} ya existe`);
+            errors.push(`Registro con código ${transformedItem.codigo} ya existe para la finca con ID ${transformedItem.fincaId}`);
             continue;
           }
 
           validData.push({
-            ...cleanedItem,
-            activo: true,
+            ...transformedItem,
             createdAt: new Date(),
             updatedAt: new Date()
           });
@@ -118,6 +144,91 @@ export class ImportacionesService {
         errors: [error.message]
       };
     }
+  }
+
+  // Método para precargar los caches de búsqueda
+  private async precargarCaches(
+    fincasCache: Map<string, number>,
+    lugaresEjecucionCache: Map<string, number>,
+    unidadesMedidaCache: Map<string, number>
+  ): Promise<void> {
+    // Cargar todas las fincas
+    const fincas = await this.fincaRepository.find();
+    fincas.forEach(finca => {
+      if (finca.descripcion) {
+        fincasCache.set(finca.descripcion.toLowerCase(), finca.id);
+      }
+    });
+
+    // Cargar todos los lugares de ejecución
+    const lugaresEjecucion = await this.lugarEjecucionRepository.find();
+    lugaresEjecucion.forEach(lugar => {
+      if (lugar.descripcion) {
+        lugaresEjecucionCache.set(lugar.descripcion.toLowerCase(), lugar.id);
+      }
+    });
+
+    // Cargar todas las unidades de medida
+    const unidadesMedida = await this.unidadMedidaRepository.find();
+    unidadesMedida.forEach(unidad => {
+      if (unidad.descripcion) {
+        unidadesMedidaCache.set(unidad.descripcion.toLowerCase(), unidad.id);
+      }
+    });
+  }
+
+  // Método para transformar valores especiales (S/N, buscar IDs por descripción)
+  private async transformSpecialValues(
+    item: any, 
+    fincasCache: Map<string, number>,
+    lugaresEjecucionCache: Map<string, number>,
+    unidadesMedidaCache: Map<string, number>,
+    errors: string[]
+  ): Promise<any | null> {
+    const result = { ...item };
+    
+    // Transformar campo fincaId (descripción a ID)
+    if ('fincaId' in result && typeof result.fincaId === 'string') {
+      const fincaDesc = result.fincaId.toLowerCase().trim();
+      if (fincasCache.has(fincaDesc)) {
+        result.fincaId = fincasCache.get(fincaDesc);
+      } else {
+        errors.push(`No se encontró la finca con descripción: ${result.fincaId}`);
+        return null;
+      }
+    }
+    
+    // Transformar campo lugarEjecucionId (Lote, Otros, Canal a ID)
+    if ('lugarEjecucionId' in result && typeof result.lugarEjecucionId === 'string') {
+      const lugarDesc = result.lugarEjecucionId.toLowerCase().trim();
+      if (lugaresEjecucionCache.has(lugarDesc)) {
+        result.lugarEjecucionId = lugaresEjecucionCache.get(lugarDesc);
+      } else {
+        errors.push(`No se encontró el lugar de ejecución con descripción: ${result.lugarEjecucionId}`);
+        return null;
+      }
+    }
+    
+    // Transformar campo unidadMedidaId (descripción a ID)
+    if ('unidadMedidaId' in result && typeof result.unidadMedidaId === 'string') {
+      const unidadDesc = result.unidadMedidaId.toLowerCase().trim();
+      if (unidadesMedidaCache.has(unidadDesc)) {
+        result.unidadMedidaId = unidadesMedidaCache.get(unidadDesc);
+      } else {
+        errors.push(`No se encontró la unidad de medida con descripción: ${result.unidadMedidaId}`);
+        return null;
+      }
+    }
+    
+    // Transformar campos booleanos (S/N)
+    const booleanFields = ['rendimientoCalculado', 'convertirA20K', 'activo'];
+    for (const field of booleanFields) {
+      if (field in result && (result[field] === 'S' || result[field] === 'N')) {
+        result[field] = result[field] === 'S';
+      }
+    }
+    
+    return result;
   }
 
   // Método para limpiar y convertir valores numéricos

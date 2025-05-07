@@ -6,7 +6,7 @@ import { CreateGrupoDto } from './dto/create-grupo.dto';
 import { UpdateGrupoDto } from './dto/update-grupo.dto';
 
 @Injectable()
-export class GruposLaborService {
+export class GruposService {
   constructor(
     @InjectRepository(Grupo)
     private grupoLaborRepository: Repository<Grupo>,

@@ -1,12 +1,14 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn, IsNull } from 'typeorm';
-import { UnidadMedida } from './unidad-medida.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { LugarEjecucion } from './lugar-ejecucion.entity';
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsOptional } from 'class-validator';
 
 @Entity('labores')
 export class Labor {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({default: 0})
+  fincaId?: number;
 
   @Column()
   @IsOptional()
