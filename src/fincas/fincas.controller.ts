@@ -39,4 +39,13 @@ export class FincasController {
   remove(@Param('id') id: string) {
     return this.fincasService.remove(+id);
   }
+
+  // Endpoint para eliminar un lote de una finca
+  @Delete(':fincaId/lotes/:loteId')
+  removeLote(
+    @Param('fincaId') fincaId: string,
+    @Param('loteId') loteId: string
+  ) {
+    return this.fincasService.removeLote(+fincaId, +loteId);
+  }
 } 

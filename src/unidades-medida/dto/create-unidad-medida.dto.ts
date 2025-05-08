@@ -1,10 +1,6 @@
 import { IsNotEmpty, IsString, IsOptional, IsBoolean, IsNumber } from 'class-validator';
 
 export class CreateUnidadMedidaDto {
-  @IsOptional()
-  @IsNumber()
-  id?: number;
-
   @IsNotEmpty()
   @IsString()
   codigo: string;

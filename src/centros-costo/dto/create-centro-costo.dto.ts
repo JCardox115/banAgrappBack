@@ -1,4 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsNumber } from 'class-validator';
+import { Finca } from 'src/entities/finca.entity';
+import { CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 export class CreateCentroCostoDto {
   @IsOptional()
@@ -21,6 +23,9 @@ export class CreateCentroCostoDto {
   @IsOptional()
   isPrincipal?: boolean;
 
-  @IsNotEmpty()
+  @IsOptional()
   fincaId: number;
+
+  @IsOptional()
+  finca: Finca;
 } 

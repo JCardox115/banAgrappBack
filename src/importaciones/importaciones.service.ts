@@ -68,56 +68,65 @@ export class ImportacionesService {
 
   async importData(entityName: string, data: any[]): Promise<{ success: boolean; message: string; errors?: string[] }> {
     try {
-      const repository = this.getRepository(entityName);
       const errors: string[] = [];
-      const validData: any[] = [];
+      let validData: any[] = [];
 
-      // Cache para IDs de fincas, lugares de ejecución y unidades de medida
-      const fincasCache = new Map<string, number>();
-      const lugaresEjecucionCache = new Map<string, number>();
-      const unidadesMedidaCache = new Map<string, number>();
+      // Manejo especial para GrupoLabor y ConceptoPagoGrupoLabor
+      if (entityName === 'grupoLabor') {
+        validData = await this.processGrupoLabor(data, errors);
+      } else if (entityName === 'conceptoPagoGrupoLabor') {
+        validData = await this.processConceptoPagoGrupoLabor(data, errors);
+      } else {
+        // Procesamiento normal para otras entidades
+        const repository = this.getRepository(entityName);
+        
+        // Cache para IDs de fincas, lugares de ejecución y unidades de medida
+        const fincasCache = new Map<string, number>();
+        const lugaresEjecucionCache = new Map<string, number>();
+        const unidadesMedidaCache = new Map<string, number>();
 
-      // Cargar datos de fincas, lugares de ejecución y unidades de medida en cache
-      await this.precargarCaches(fincasCache, lugaresEjecucionCache, unidadesMedidaCache);
+        // Cargar datos de fincas, lugares de ejecución y unidades de medida en cache
+        await this.precargarCaches(fincasCache, lugaresEjecucionCache, unidadesMedidaCache);
 
-      // Validar y preparar los datos
-      for (const item of data) {
-        try {
-          // Limpiar y convertir valores numéricos
-          const cleanedItem = this.cleanNumericValues(item);
-          
-          // Transformar valores especiales (S/N a booleanos, descripciones a IDs)
-          const transformedItem = await this.transformSpecialValues(
-            cleanedItem, 
-            fincasCache, 
-            lugaresEjecucionCache, 
-            unidadesMedidaCache,
-            errors
-          );
+        // Validar y preparar los datos
+        for (const item of data) {
+          try {
+            // Limpiar y convertir valores numéricos
+            const cleanedItem = this.cleanNumericValues(item);
+            
+            // Transformar valores especiales (S/N a booleanos, descripciones a IDs)
+            const transformedItem = await this.transformSpecialValues(
+              cleanedItem, 
+              fincasCache, 
+              lugaresEjecucionCache, 
+              unidadesMedidaCache,
+              errors
+            );
 
-          if (!transformedItem) {
-            continue; // Saltar este ítem si la transformación falló
+            if (!transformedItem) {
+              continue; // Saltar este ítem si la transformación falló
+            }
+
+            const existing = await repository.findOne({ 
+              where: { 
+                fincaId: transformedItem.fincaId, 
+                codigo: transformedItem.codigo 
+              } 
+            });
+            
+            if (existing) {
+              errors.push(`Registro con código ${transformedItem.codigo} ya existe para la finca con ID ${transformedItem.fincaId}`);
+              continue;
+            }
+
+            validData.push({
+              ...transformedItem,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            });
+          } catch (error) {
+            errors.push(`Error procesando registro: ${error.message}`);
           }
-
-          const existing = await repository.findOne({ 
-            where: { 
-              fincaId: transformedItem.fincaId, 
-              codigo: transformedItem.codigo 
-            } 
-          });
-          
-          if (existing) {
-            errors.push(`Registro con código ${transformedItem.codigo} ya existe para la finca con ID ${transformedItem.fincaId}`);
-            continue;
-          }
-
-          validData.push({
-            ...transformedItem,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          });
-        } catch (error) {
-          errors.push(`Error procesando registro: ${error.message}`);
         }
       }
 
@@ -128,9 +137,18 @@ export class ImportacionesService {
           errors
         };
       }
-      console.log(validData);
-      // Guardar los datos válidos
-      await repository.save(validData);
+
+      console.log(`Datos válidos para importar (${entityName}):`, validData.length);
+      
+      // Guardar los datos según la entidad
+      if (entityName === 'grupoLabor') {
+        await this.grupoLaborRepository.save(validData);
+      } else if (entityName === 'conceptoPagoGrupoLabor') {
+        await this.conceptoPagoGrupoLaborRepository.save(validData);
+      } else {
+        const repository = this.getRepository(entityName);
+        await repository.save(validData);
+      }
 
       return {
         success: true,
@@ -138,12 +156,237 @@ export class ImportacionesService {
         errors: errors.length > 0 ? errors : undefined
       };
     } catch (error) {
+      console.error('Error durante la importación:', error);
       return {
         success: false,
         message: 'Error durante la importación',
         errors: [error.message]
       };
     }
+  }
+
+  // Método para procesar importación de GrupoLabor
+  private async processGrupoLabor(data: any[], errors: string[]): Promise<any[]> {
+    const validData: GrupoLabor[] = [];
+    const fincasCache = new Map<string, number>();
+    const laboresCache = new Map<string, Map<number, number>>();
+    const gruposCache = new Map<string, Map<number, number>>();
+
+    // Precargar datos de fincas
+    const fincas = await this.fincaRepository.find();
+    fincas.forEach(finca => {
+      if (finca.descripcion) {
+        fincasCache.set(finca.descripcion.toLowerCase(), finca.id);
+      }
+    });
+
+    // Precargar datos de labores agrupados por finca
+    const labores = await this.laborRepository.find();
+    labores.forEach(labor => {
+      if (labor.descripcion && labor.fincaId) {
+        if (!laboresCache.has(labor.descripcion.toLowerCase())) {
+          laboresCache.set(labor.descripcion.toLowerCase(), new Map<number, number>());
+        }
+        laboresCache.get(labor.descripcion.toLowerCase())!.set(labor.fincaId, labor.id);
+      }
+    });
+
+    // Precargar datos de grupos agrupados por finca
+    const grupos = await this.grupoRepository.find();
+    grupos.forEach(grupo => {
+      if (grupo.descripcion && grupo.fincaId) {
+        if (!gruposCache.has(grupo.descripcion.toLowerCase())) {
+          gruposCache.set(grupo.descripcion.toLowerCase(), new Map<number, number>());
+        }
+        gruposCache.get(grupo.descripcion.toLowerCase())!.set(grupo.fincaId, grupo.id);
+      }
+    });
+
+    // Procesar cada registro
+    for (const item of data) {
+      try {
+        const { labor: laborDesc, grupo: grupoDesc, fincaId: fincaDesc, ...rest } = item;
+        
+        if (!laborDesc || !grupoDesc || !fincaDesc) {
+          errors.push('Faltan campos obligatorios: labor, grupo o fincaId');
+          continue;
+        }
+
+        // Obtener ID de finca
+        const fincaIdLower = fincaDesc.toLowerCase().trim();
+        if (!fincasCache.has(fincaIdLower)) {
+          errors.push(`No se encontró la finca con descripción: ${fincaDesc}`);
+          continue;
+        }
+        const fincaId = fincasCache.get(fincaIdLower)!;
+
+        // Obtener ID de labor por descripción y fincaId
+        const laborLower = laborDesc.toLowerCase().trim();
+        if (!laboresCache.has(laborLower) || !laboresCache.get(laborLower)!.has(fincaId)) {
+          errors.push(`No se encontró la labor '${laborDesc}' para la finca '${fincaDesc}'`);
+          continue;
+        }
+        const idLabor = laboresCache.get(laborLower)!.get(fincaId)!;
+
+        // Obtener ID de grupo por descripción y fincaId
+        const grupoLower = grupoDesc.toLowerCase().trim();
+        if (!gruposCache.has(grupoLower) || !gruposCache.get(grupoLower)!.has(fincaId)) {
+          errors.push(`No se encontró el grupo '${grupoDesc}' para la finca '${fincaDesc}'`);
+          continue;
+        }
+        const idGrupo = gruposCache.get(grupoLower)!.get(fincaId)!;
+
+        // Verificar si ya existe la relación
+        const existingRelation = await this.grupoLaborRepository.findOne({
+          where: { idLabor, idGrupo }
+        });
+
+        if (existingRelation) {
+          errors.push(`Ya existe una relación entre la labor '${laborDesc}' y el grupo '${grupoDesc}' para la finca '${fincaDesc}'`);
+          continue;
+        }
+
+        // Crear nuevo registro de GrupoLabor
+        validData.push({
+          idLabor,
+          idGrupo,
+          activo: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          ...rest
+        });
+      } catch (error) {
+        errors.push(`Error procesando relación labor-grupo: ${error.message}`);
+      }
+    }
+
+    return validData;
+  }
+
+  // Método para procesar importación de ConceptoPagoGrupoLabor
+  private async processConceptoPagoGrupoLabor(data: any[], errors: string[]): Promise<any[]> {
+    const validData: ConceptoPagoGrupoLabor[] = [];
+    const fincasCache = new Map<string, number>();
+    const laboresCache = new Map<string, Map<number, number>>();
+    const conceptosCache = new Map<string, Map<number, number>>();
+    const grupoLaborCache = new Map<number, Map<number, number>>();
+
+    // Precargar datos de fincas
+    const fincas = await this.fincaRepository.find();
+    fincas.forEach(finca => {
+      if (finca.descripcion) {
+        fincasCache.set(finca.descripcion.toLowerCase(), finca.id);
+      }
+    });
+
+    // Precargar datos de labores agrupados por finca
+    const labores = await this.laborRepository.find();
+    labores.forEach(labor => {
+      if (labor.descripcion && labor.fincaId) {
+        if (!laboresCache.has(labor.descripcion.toLowerCase())) {
+          laboresCache.set(labor.descripcion.toLowerCase(), new Map<number, number>());
+        }
+        laboresCache.get(labor.descripcion.toLowerCase())!.set(labor.fincaId, labor.id);
+      }
+    });
+
+    // Precargar datos de conceptos de pago agrupados por finca
+    const conceptos = await this.conceptoPagoRepository.find();
+    conceptos.forEach(concepto => {
+      if (concepto.descripcion && concepto.fincaId) {
+        if (!conceptosCache.has(concepto.descripcion.toLowerCase())) {
+          conceptosCache.set(concepto.descripcion.toLowerCase(), new Map<number, number>());
+        }
+        conceptosCache.get(concepto.descripcion.toLowerCase())!.set(concepto.fincaId, concepto.id);
+      }
+    });
+
+    // Precargar relaciones GrupoLabor (por idLabor e idGrupo)
+    const gruposLabores = await this.grupoLaborRepository.find();
+    gruposLabores.forEach(grupoLabor => {
+      if (!grupoLaborCache.has(grupoLabor.idLabor)) {
+        grupoLaborCache.set(grupoLabor.idLabor, new Map<number, number>());
+      }
+      grupoLaborCache.get(grupoLabor.idLabor)!.set(grupoLabor.idGrupo, grupoLabor.id);
+    });
+
+    // Precargar las relaciones Grupo para cada labor
+    const gruposConLabores = await this.grupoLaborRepository.find({
+      relations: ['grupo']
+    });
+    
+    // Procesar cada registro
+    for (const item of data) {
+      try {
+        const { conceptoPago: conceptoDesc, labor: laborDesc, fincaId: fincaDesc, ...rest } = item;
+        
+        if (!conceptoDesc || !laborDesc || !fincaDesc) {
+          errors.push('Faltan campos obligatorios: conceptoPago, labor o fincaId');
+          continue;
+        }
+
+        // Obtener ID de finca
+        const fincaIdLower = fincaDesc.toLowerCase().trim();
+        if (!fincasCache.has(fincaIdLower)) {
+          errors.push(`No se encontró la finca con descripción: ${fincaDesc}`);
+          continue;
+        }
+        const fincaId = fincasCache.get(fincaIdLower)!;
+
+        // Obtener ID de labor por descripción y fincaId
+        const laborLower = laborDesc.toLowerCase().trim();
+        if (!laboresCache.has(laborLower) || !laboresCache.get(laborLower)!.has(fincaId)) {
+          errors.push(`No se encontró la labor '${laborDesc}' para la finca '${fincaDesc}'`);
+          continue;
+        }
+        const idLabor = laboresCache.get(laborLower)!.get(fincaId)!;
+
+        // Obtener todos los grupos asociados a esta labor
+        const gruposLaboresParaLabor = gruposConLabores.filter(gl => gl.idLabor === idLabor);
+        
+        if (gruposLaboresParaLabor.length === 0) {
+          errors.push(`La labor '${laborDesc}' no está asociada a ningún grupo en la finca '${fincaDesc}'`);
+          continue;
+        }
+
+        // Obtener ID de concepto de pago por descripción y fincaId
+        const conceptoLower = conceptoDesc.toLowerCase().trim();
+        if (!conceptosCache.has(conceptoLower) || !conceptosCache.get(conceptoLower)!.has(fincaId)) {
+          errors.push(`No se encontró el concepto de pago '${conceptoDesc}' para la finca '${fincaDesc}'`);
+          continue;
+        }
+        const conceptoPagoId = conceptosCache.get(conceptoLower)!.get(fincaId)!;
+
+        // Procesar cada GrupoLabor asociado a esta labor
+        for (const grupoLabor of gruposLaboresParaLabor) {
+          const grupoLaborId = grupoLabor.id;
+          
+          // Verificar si ya existe la relación
+          const existingRelation = await this.conceptoPagoGrupoLaborRepository.findOne({
+            where: { conceptoPagoId, grupoLaborId }
+          });
+
+          if (existingRelation) {
+            errors.push(`Ya existe una relación entre el concepto '${conceptoDesc}' y la labor '${laborDesc}' para el grupo '${grupoLabor.grupo?.descripcion || 'Desconocido'}' en la finca '${fincaDesc}'`);
+            continue;
+          }
+
+          // Crear nuevo registro de ConceptoPagoGrupoLabor
+          validData.push({
+            conceptoPagoId,
+            grupoLaborId,
+            activo: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            ...rest
+          });
+        }
+      } catch (error) {
+        errors.push(`Error procesando relación concepto-labor: ${error.message}`);
+      }
+    }
+
+    return validData;
   }
 
   // Método para precargar los caches de búsqueda

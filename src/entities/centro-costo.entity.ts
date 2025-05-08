@@ -13,10 +13,10 @@ export class CentroCosto {
   descripcion: string;
 
   @Column()
-  fincaId: number;
+  fincaId?: number;
 
   @ManyToOne(() => Finca, finca => finca.centrosCosto)
-  finca: Finca;
+  finca?: Finca;
 
   @Column({ default: true })
   activo: boolean;
@@ -25,8 +25,8 @@ export class CentroCosto {
   isPrincipal: boolean;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt?: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt?: Date;
 } 
