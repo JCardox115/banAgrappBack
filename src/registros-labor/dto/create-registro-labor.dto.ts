@@ -11,7 +11,6 @@ export class CreateRegistroLaborDto {
   conceptoPagoGrupoLaborId: number;
 
   @IsNotEmpty()
-  @IsNumber()
   centroCostoId: number;
 
   @IsNotEmpty()
@@ -23,7 +22,6 @@ export class CreateRegistroLaborDto {
   cantidad: number;
 
   @IsOptional()
-  @IsNumber()
   valorUnitario?: number;
 
   @IsOptional()

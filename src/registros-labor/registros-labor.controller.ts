@@ -39,7 +39,33 @@ export class RegistrosLaborController {
     @Query('tipoRegistro') tipoRegistro?: string,
     @Query('fincaId') fincaId?: number
   ) {
-    return this.registrosLaborService.findByRangoFechas(fechaInicio, fechaFin, tipoRegistro, fincaId);
+    // Sanitizar fechas para eliminar cualquier información de zona horaria
+    // Asegurarnos que solo llegue la fecha en formato YYYY-MM-DD
+    try {
+      // Extraer solo la parte de la fecha (YYYY-MM-DD) si es una fecha completa
+      const sanitizeFecha = (fecha: string): string => {
+        // Si la fecha ya es un formato válido de YYYY-MM-DD, la devolvemos tal cual
+        if (/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+          return fecha;
+        }
+        
+        // Si contiene información de zona horaria u otros componentes, extraer solo YYYY-MM-DD
+        try {
+          const dateObj = new Date(fecha);
+          return dateObj.toISOString().split('T')[0]; // Extraer solo YYYY-MM-DD
+        } catch (err) {
+          // Si hay error al parsear, devolver la fecha original y dejar que el error ocurra en el servicio
+          return fecha;
+        }
+      };
+      
+      const fechaInicioSanitizada = sanitizeFecha(fechaInicio);
+      const fechaFinSanitizada = sanitizeFecha(fechaFin);
+      
+      return this.registrosLaborService.findByRangoFechas(fechaInicioSanitizada, fechaFinSanitizada, tipoRegistro, fincaId);
+    } catch (error) {
+      throw new Error(`Error procesando fechas: ${error.message}`);
+    }
   }
 
   @Get(':id')
