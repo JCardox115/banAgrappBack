@@ -70,6 +70,87 @@ export class RegistrosLaborController {
     }
   }
 
+  // ENDPOINTS PARA INFORMES
+
+  @Get('horas-por-grupo')
+  getHorasPorGrupo(
+    @Query('fincaId') fincaId: number,
+    @Query('fechaInicio') fechaInicio: string,
+    @Query('fechaFin') fechaFin: string,
+    @Query('empleadoId') empleadoId?: number
+  ) {
+    const fechaInicioSanitizada = fechaInicio.split('T')[0];
+    const fechaFinSanitizada = fechaFin.split('T')[0];
+    
+    return this.registrosLaborService.getHorasPorGrupo(
+      fincaId, 
+      fechaInicioSanitizada, 
+      fechaFinSanitizada, 
+      empleadoId
+    );
+  }
+
+  @Get('horas-por-semana')
+  getHorasPorSemana(
+    @Query('fincaId') fincaId: number,
+    @Query('anio') anio: number,
+    @Query('empleadoId') empleadoId?: number
+  ) {
+    return this.registrosLaborService.getHorasPorSemana(fincaId, anio, empleadoId);
+  }
+
+  @Get('areas-por-lote')
+  getAreasPorLote(
+    @Query('fincaId') fincaId: number,
+    @Query('fechaInicio') fechaInicio: string,
+    @Query('fechaFin') fechaFin: string,
+    @Query('empleadoId') empleadoId?: number
+  ) {
+    try {
+      this.logger.debug(`Recibida solicitud de áreas por lote: fincaId=${fincaId}`);
+      
+      // Sanitizar fechas
+      const fechaInicioSanitizada = fechaInicio ? fechaInicio.split('T')[0] : new Date().toISOString().split('T')[0];
+      const fechaFinSanitizada = fechaFin ? fechaFin.split('T')[0] : new Date().toISOString().split('T')[0];
+      
+      return this.registrosLaborService.getAreasPorLote(
+        fincaId, 
+        fechaInicioSanitizada, 
+        fechaFinSanitizada, 
+        empleadoId
+      );
+    } catch (error) {
+      this.logger.error(`Error en getAreasPorLote: ${error.message}`);
+      throw error;
+    }
+  }
+
+  // @Get('costos-por-centro')
+  // getCostosPorCentroCosto(
+  //   @Query('fincaId') fincaId: number,
+  //   @Query('fechaInicio') fechaInicio: string,
+  //   @Query('fechaFin') fechaFin: string,
+  //   @Query('empleadoId') empleadoId?: number
+  // ) {
+  //   try {
+  //     this.logger.debug(`Recibida solicitud de costos por centro: fincaId=${fincaId}`);
+      
+  //     // Sanitizar fechas
+  //     const fechaInicioSanitizada = fechaInicio ? fechaInicio.split('T')[0] : new Date().toISOString().split('T')[0];
+  //     const fechaFinSanitizada = fechaFin ? fechaFin.split('T')[0] : new Date().toISOString().split('T')[0];
+      
+  //     return this.registrosLaborService.getCostosPorCentroCosto(
+  //       fincaId, 
+  //       fechaInicioSanitizada, 
+  //       fechaFinSanitizada, 
+  //       empleadoId
+  //     );
+  //   } catch (error) {
+  //     this.logger.error(`Error en getCostosPorCentroCosto: ${error.message}`);
+  //     throw error;
+  //   }
+  // }
+
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.registrosLaborService.findOne(id);

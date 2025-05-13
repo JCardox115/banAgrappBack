@@ -348,4 +348,371 @@ export class RegistrosLaborService {
       throw error;
     }
   }
+
+  // MÉTODOS PARA INFORMES GENERALES
+
+  async getHorasPorGrupo(fincaId: number, fechaInicio: string, fechaFin: string, empleadoId?: number): Promise<any> {
+    try {
+      this.logger.debug(`Generando informe de horas por grupo de labor: fincaId=${fincaId}, fechaInicio=${fechaInicio}, fechaFin=${fechaFin}, empleadoId=${empleadoId || 'no definido'}`);
+      
+      // Consulta SQL nativa corregida con nombres exactos de la base de datos
+      const query = `
+        SELECT 
+          COALESCE(g.descripcion, 'Sin grupo') AS "grupoNombre",
+          SUM(rl.horas) AS "horas"
+        FROM 
+          registros_labor rl
+        LEFT JOIN concepto_pago_grupo_labor cpgl ON rl."conceptoPagoGrupoLaborId" = cpgl.id
+        LEFT JOIN grupo_labor gl ON cpgl."grupoLaborId" = gl.id
+        LEFT JOIN grupos g ON gl."idGrupo" = g.id
+        JOIN centros_costo cc ON rl."centroCostoId" = cc.id
+        WHERE 
+          cc."fincaId" = $1
+          AND DATE(rl.fecha) BETWEEN $2 AND $3
+          ${empleadoId ? 'AND rl."empleadoId" = $4' : ''}
+        GROUP BY 
+          g.descripcion
+        ORDER BY 
+          "horas" DESC
+      `;
+      
+      const params = [fincaId, fechaInicio, fechaFin];
+      if (empleadoId) {
+        params.push(empleadoId);
+      }
+      
+      const result = await this.registroRepository.query(query, params);
+      
+      // Si no hay datos, devolver información predeterminada
+      if (result.length === 0) {
+        this.logger.warn(`No se encontraron registros de labor para la finca ${fincaId} en el período ${fechaInicio} - ${fechaFin}`);
+        return {
+          labels: ['Sin datos'],
+          datasets: [
+            {
+              data: [1],
+              backgroundColor: ['#CCCCCC']
+            }
+          ]
+        };
+      }
+      
+      // Generar los colores para el gráfico
+      const colors = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+        '#FF9F40', '#8AC249', '#EA80FC', '#607D8B', '#00BCD4'
+      ];
+      
+      // Formatear los datos para el gráfico
+      const labels = result.map(item => item.grupoNombre);
+      const data = result.map(item => parseFloat(item.horas) || 0);
+      const backgroundColor = result.map((_, index) => colors[index % colors.length]);
+      
+      return {
+        labels,
+        datasets: [
+          {
+            data,
+            backgroundColor
+          }
+        ]
+      };
+    } catch (error) {
+      this.logger.error(`Error al generar informe de horas por grupo: ${error.message}`);
+      this.logger.error(error.stack);
+      
+      // En caso de error, devolver datos de ejemplo para que el frontend no falle
+      return {
+        labels: ['Error al cargar datos'],
+        datasets: [
+          {
+            data: [1],
+            backgroundColor: ['#FF6384']
+          }
+        ]
+      };
+    }
+  }
+
+  async getHorasPorSemana(fincaId: number, anio: number, empleadoId?: number): Promise<any> {
+    try {
+      this.logger.debug(`Generando informe de horas por semana: fincaId=${fincaId}, anio=${anio}, empleadoId=${empleadoId || 'no definido'}`);
+      
+      // Consulta SQL nativa corregida con nombres exactos
+      const semanaQuery = `
+        SELECT 
+          rl.semana AS "semana",
+          SUM(rl.horas) AS "horas"
+        FROM 
+          registros_labor rl
+        JOIN centros_costo c ON rl."centroCostoId" = c.id
+        WHERE 
+          c."fincaId" = $1
+          AND rl.anio = $2
+          ${empleadoId ? 'AND rl."empleadoId" = $3' : ''}
+        GROUP BY 
+          rl.semana
+        ORDER BY 
+          rl.semana ASC
+      `;
+      
+      const params = [fincaId, anio];
+      if (empleadoId) {
+        params.push(empleadoId);
+      }
+      
+      const result = await this.registroRepository.query(semanaQuery, params);
+      
+      // Si no hay datos, devolver información predeterminada
+      if (result.length === 0) {
+        this.logger.warn(`No se encontraron horas registradas para la finca ${fincaId} en el año ${anio}`);
+        return {
+          labels: Array.from({ length: 52 }, (_, i) => `Semana ${i + 1}`),
+          datasets: [
+            {
+              label: 'Horas trabajadas',
+              data: Array(52).fill(0),
+              borderColor: '#36A2EB',
+              backgroundColor: 'rgba(54, 162, 235, 0.2)',
+              tension: 0.1,
+              fill: true
+            }
+          ]
+        };
+      }
+      
+      // Generar las etiquetas para todas las semanas del año (máximo 52)
+      const labels = Array.from({ length: 52 }, (_, i) => `Semana ${i + 1}`);
+      
+      // Inicializar array de datos con ceros
+      const horasPorSemana = Array(52).fill(0);
+      
+      // Llenar los datos reales
+      result.forEach(item => {
+        const semana = parseInt(item.semana);
+        if (semana > 0 && semana <= 52) {
+          horasPorSemana[semana - 1] = parseFloat(item.horas) || 0;
+        }
+      });
+      
+      return {
+        labels,
+        datasets: [
+          {
+            label: 'Horas trabajadas',
+            data: horasPorSemana,
+            borderColor: '#36A2EB',
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            tension: 0.1,
+            fill: true
+          }
+        ]
+      };
+    } catch (error) {
+      this.logger.error(`Error al generar informe de horas por semana: ${error.message}`);
+      this.logger.error(error.stack);
+      
+      // En caso de error, devolver datos de ejemplo
+      return {
+        labels: Array.from({ length: 52 }, (_, i) => `Semana ${i + 1}`),
+        datasets: [
+          {
+            label: 'Horas trabajadas',
+            data: Array(52).fill(0),
+            borderColor: '#36A2EB',
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            tension: 0.1,
+            fill: true
+          }
+        ]
+      };
+    }
+  }
+
+  async getAreasPorLote(fincaId: number, fechaInicio: string, fechaFin: string, empleadoId?: number): Promise<any> {
+    try {
+      this.logger.debug(`Generando informe de áreas por lote: fincaId=${fincaId}, fechaInicio=${fechaInicio}, fechaFin=${fechaFin}, empleadoId=${empleadoId || 'no definido'}`);
+      
+      // Consulta SQL nativa corregida con nombres exactos
+      const loteQuery = `
+        SELECT 
+          l.num_lote AS "loteNumero", 
+          l.hectareas_netas AS "areaTotal",
+          COALESCE(SUM(rld."areaRealizada"), 0) AS "areaRealizada"
+        FROM 
+          lotes l
+        LEFT JOIN registros_labor_detalle rld ON l.id = rld."loteId"
+        LEFT JOIN registros_labor rl ON rld."registroLaborId" = rl.id
+          AND DATE(rl.fecha) BETWEEN $2 AND $3
+          ${empleadoId ? 'AND rl."empleadoId" = $4' : ''}
+        WHERE 
+          l.finca_id = $1
+          AND l.activo = true
+        GROUP BY 
+          l.id, l.num_lote, l.hectareas_netas
+        ORDER BY 
+          l.num_lote ASC
+      `;
+      
+      const params = [fincaId, fechaInicio, fechaFin];
+      if (empleadoId) {
+        params.push(empleadoId);
+      }
+      
+      // Ejecutar la consulta
+      this.logger.debug(`Ejecutando consulta SQL: ${loteQuery}`);
+      const result = await this.registroRepository.query(loteQuery, params);
+      
+      // Si no hay resultados, devolver datos de muestra
+      if (!result || result.length === 0) {
+        this.logger.warn(`No se encontraron lotes para la finca ${fincaId}`);
+        return {
+          labels: ['Sin datos'],
+          datasets: [
+            {
+              label: 'Área total',
+              data: [0],
+              backgroundColor: '#36A2EB'
+            },
+            {
+              label: 'Área trabajada',
+              data: [0],
+              backgroundColor: '#FF6384'
+            }
+          ]
+        };
+      }
+      
+      // Formatear los datos para el gráfico
+      const labels = result.map(item => `Lote ${item.loteNumero}`);
+      const areaTotal = result.map(item => parseFloat(item.areaTotal) || 0);
+      const areaRealizada = result.map(item => parseFloat(item.areaRealizada) || 0);
+      
+      this.logger.debug(`Áreas por lote obtenidas exitosamente: ${result.length} lotes encontrados`);
+      
+      return {
+        labels,
+        datasets: [
+          {
+            label: 'Área total',
+            data: areaTotal,
+            backgroundColor: '#36A2EB'
+          },
+          {
+            label: 'Área trabajada',
+            data: areaRealizada,
+            backgroundColor: '#FF6384'
+          }
+        ]
+      };
+    } catch (error) {
+      this.logger.error(`Error al generar informe de áreas por lote: ${error.message}`);
+      this.logger.error(error.stack);
+      
+      // En caso de error, devolver datos de muestra
+      return {
+        labels: ['Error al cargar datos'],
+        datasets: [
+          {
+            label: 'Área total',
+            data: [0],
+            backgroundColor: '#36A2EB'
+          },
+          {
+            label: 'Área trabajada',
+            data: [0],
+            backgroundColor: '#FF6384'
+          }
+        ]
+      };
+    }
+  }
+
+  // async getCostosPorCentroCosto(fincaId: number, fechaInicio: string, fechaFin: string, empleadoId?: number): Promise<any> {
+  //   try {
+  //     this.logger.debug(`Generando informe de costos por centro de costo: fincaId=${fincaId}, fechaInicio=${fechaInicio}, fechaFin=${fechaFin}, empleadoId=${empleadoId || 'no definido'}`);
+      
+  //     // Consulta SQL nativa mejorada para costos por centro
+  //     const costoQuery = `
+  //       SELECT 
+  //         cc.descripcion AS "centroCostoNombre", 
+  //         COALESCE(SUM(rl.total), 0) AS "costoTotal"
+  //       FROM 
+  //         centros_costo cc
+  //       LEFT JOIN registros_labor rl ON cc.id = rl."centroCostoId"
+  //         AND DATE(rl.fecha) BETWEEN $2 AND $3
+  //         ${empleadoId ? 'AND rl."empleadoId" = $4' : ''}
+  //       WHERE 
+  //         cc.fincaId = $1
+  //         AND cc.activo = true
+  //       GROUP BY 
+  //         cc.id, cc.descripcion
+  //       ORDER BY 
+  //         "costoTotal" DESC
+  //     `;
+      
+  //     const params = [fincaId, fechaInicio, fechaFin];
+  //     if (empleadoId) {
+  //       params.push(empleadoId);
+  //     }
+      
+  //     // Ejecutar la consulta
+  //     this.logger.debug(`Ejecutando consulta SQL: ${costoQuery}`);
+  //     const result = await this.registroRepository.query(costoQuery, params);
+      
+  //     // Si no hay resultados, devolver datos de muestra
+  //     if (!result || result.length === 0) {
+  //       this.logger.warn(`No se encontraron centros de costo con datos para la finca ${fincaId}`);
+  //       return {
+  //         labels: ['Sin datos'],
+  //         datasets: [
+  //           {
+  //             label: 'Costos ($)',
+  //             data: [0],
+  //             backgroundColor: ['#CCCCCC']
+  //           }
+  //         ]
+  //       };
+  //     }
+      
+  //     // Generar los colores para el gráfico
+  //     const colors = [
+  //       '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+  //       '#FF9F40', '#8AC249', '#EA80FC', '#607D8B', '#00BCD4'
+  //     ];
+      
+  //     // Formatear los datos para el gráfico
+  //     const labels = result.map(item => item.centroCostoNombre);
+  //     const data = result.map(item => parseFloat(item.costoTotal) || 0);
+  //     const backgroundColor = result.map((_, index) => colors[index % colors.length]);
+      
+  //     this.logger.debug(`Costos por centro obtenidos exitosamente: ${result.length} centros encontrados`);
+      
+  //     return {
+  //       labels,
+  //       datasets: [
+  //         {
+  //           label: 'Costos ($)',
+  //           data,
+  //           backgroundColor
+  //         }
+  //       ]
+  //     };
+  //   } catch (error) {
+  //     this.logger.error(`Error al generar informe de costos por centro de costo: ${error.message}`);
+  //     this.logger.error(error.stack);
+      
+  //     // En caso de error, devolver datos de muestra
+  //     return {
+  //       labels: ['Error al cargar datos'],
+  //       datasets: [
+  //         {
+  //           label: 'Costos ($)',
+  //           data: [0],
+  //           backgroundColor: ['#FF6384']
+  //         }
+  //       ]
+  //     };
+  //   }
+  // }
 } 
