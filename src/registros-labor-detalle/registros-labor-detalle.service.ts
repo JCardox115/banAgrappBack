@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RegistroLaborDetalle } from '../entities/registro-labor-detalle.entity';
@@ -7,6 +7,8 @@ import { UpdateRegistroLaborDetalleDto } from './dto/update-registro-labor-detal
 
 @Injectable()
 export class RegistrosLaborDetalleService {
+  private readonly logger = new Logger(RegistrosLaborDetalleService.name);
+
   constructor(
     @InjectRepository(RegistroLaborDetalle)
     private registroDetalleRepository: Repository<RegistroLaborDetalle>,
@@ -25,17 +27,30 @@ export class RegistrosLaborDetalleService {
   }
 
   async createBulk(detallesDto: CreateRegistroLaborDetalleDto[]): Promise<RegistroLaborDetalle[]> {
-    const detallesToSave = detallesDto.map(dto => {
-      const { registroLaborId, loteId, ...detalleData } = dto;
-      
-      return this.registroDetalleRepository.create({
-        ...detalleData,
-        registroLabor: { id: registroLaborId },
-        ...(loteId ? { lote: { id: loteId } } : {})
-      });
-    });
+    this.logger.debug(`Creando ${detallesDto.length} detalles en bulk`);
+    this.logger.debug(`Datos recibidos: ${JSON.stringify(detallesDto)}`);
     
-    return this.registroDetalleRepository.save(detallesToSave);
+    try {
+      const detallesToSave = detallesDto.map(dto => {
+        const { registroLaborId, loteId, ...detalleData } = dto;
+        
+        this.logger.debug(`Preparando detalle para registro ${registroLaborId}, lote ${loteId}`);
+        return this.registroDetalleRepository.create({
+          ...detalleData,
+          registroLabor: { id: registroLaborId },
+          ...(loteId ? { lote: { id: loteId } } : {})
+        });
+      });
+      
+      this.logger.debug(`Guardando ${detallesToSave.length} detalles`);
+      const result = await this.registroDetalleRepository.save(detallesToSave);
+      this.logger.debug(`${result.length} detalles guardados exitosamente`);
+      return result;
+    } catch (error) {
+      this.logger.error(`Error al crear detalles en bulk: ${error.message}`);
+      this.logger.error(error.stack);
+      throw error;
+    }
   }
 
   async findAll(): Promise<RegistroLaborDetalle[]> {
@@ -93,6 +108,14 @@ export class RegistrosLaborDetalleService {
   }
 
   async removeByRegistroLabor(registroLaborId: number): Promise<void> {
-    await this.registroDetalleRepository.delete({ registroLaborId });
+    this.logger.debug(`Eliminando detalles para el registro de labor ID: ${registroLaborId}`);
+    try {
+      const result = await this.registroDetalleRepository.delete({ registroLaborId });
+      this.logger.debug(`Detalles eliminados: ${result.affected}`);
+    } catch (error) {
+      this.logger.error(`Error al eliminar detalles para registro ${registroLaborId}: ${error.message}`);
+      this.logger.error(error.stack);
+      throw error;
+    }
   }
 } 

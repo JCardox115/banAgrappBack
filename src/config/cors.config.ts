@@ -8,7 +8,7 @@ export const corsConfig: CorsOptions = {
   origin: [
     'https://reportes-nomina.netlify.app',
     'https:ngrok-free.app//fe67-2800-e2-1e80-2722-2417-a30e-f170-8fe.',
-    'https://925b-2800-e2-1e80-2722-eff5-a9ef-9fa5-1ede.ngrok-free.app',
+    'https://e562-2800-e2-1e80-2722-eff5-a9ef-9fa5-1ede.ngrok-free.app',
     'http://localhost:4200'
   ],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',

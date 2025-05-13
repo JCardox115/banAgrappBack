@@ -55,6 +55,19 @@ export class ConceptoPagoGrupoLaborService {
     });
   }
 
+  async findByCodigoConcepto(codigo: string, fincaId: number): Promise<ConceptoPagoGrupoLabor[]> {
+    return this.conceptoPagoGrupoLaborRepository
+      .createQueryBuilder('conceptoPagoGrupoLabor')
+      .innerJoinAndSelect('conceptoPagoGrupoLabor.conceptoPago', 'conceptoPago')
+      .innerJoinAndSelect('conceptoPagoGrupoLabor.grupoLabor', 'grupoLabor')
+      .innerJoinAndSelect('grupoLabor.labor', 'labor')
+      .innerJoinAndSelect('grupoLabor.grupo', 'grupo')
+      .innerJoinAndSelect('conceptoPago.unidadMedida', 'unidadMedida')
+      .where('conceptoPago.codigo = :codigo', { codigo })
+      .andWhere('conceptoPago.fincaId = :fincaId', { fincaId })
+      .getMany();
+  }
+
   async update(id: number, updateConceptoPagoGrupoLaborDto: UpdateConceptoPagoGrupoLaborDto): Promise<ConceptoPagoGrupoLabor> {
     const entity = await this.findOne(id);
     this.conceptoPagoGrupoLaborRepository.merge(entity, updateConceptoPagoGrupoLaborDto);

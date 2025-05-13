@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RegistroLabor } from '../entities/registro-labor.entity';
@@ -8,6 +8,8 @@ import { RegistrosLaborDetalleService } from '../registros-labor-detalle/registr
 
 @Injectable()
 export class RegistrosLaborService {
+  private readonly logger = new Logger(RegistrosLaborService.name);
+
   constructor(
     @InjectRepository(RegistroLabor)
     private registroRepository: Repository<RegistroLabor>,
@@ -155,12 +157,25 @@ export class RegistrosLaborService {
   }
 
   async update(id: number, updateRegistroLaborDto: UpdateRegistroLaborDto): Promise<RegistroLabor> {
+    this.logger.debug(`Actualizando registro con ID: ${id}`);
+    this.logger.debug(`Datos recibidos: ${JSON.stringify(updateRegistroLaborDto)}`);
+    
+    // Verificar si el ID está presente
+    if (!updateRegistroLaborDto.id) {
+      this.logger.debug(`El DTO no tiene ID, asignando ${id}`);
+      updateRegistroLaborDto.id = id;
+    } else if (updateRegistroLaborDto.id !== id) {
+      this.logger.warn(`ID en DTO (${updateRegistroLaborDto.id}) no coincide con ID de parámetro (${id}), ajustando`);
+      updateRegistroLaborDto.id = id;
+    }
+    
     const registro = await this.registroRepository.findOne({
       where: { id },
       relations: ['empleado', 'conceptoPagoGrupoLabor', 'centroCosto']
     });
     
     if (!registro) {
+      this.logger.error(`Registro con ID ${id} no encontrado`);
       throw new NotFoundException(`Registro con ID ${id} no encontrado`);
     }
     
@@ -193,33 +208,97 @@ export class RegistrosLaborService {
       registro.total = cantidad * (valorUnitario ||  0);
     }
     
-    return this.registroRepository.save(registro);
+    try {
+      const result = await this.registroRepository.save(registro);
+      this.logger.debug(`Registro actualizado correctamente: ${JSON.stringify(result)}`);
+      return result;
+    } catch (error) {
+      this.logger.error(`Error al actualizar registro: ${error.message}`);
+      this.logger.error(error.stack);
+      throw error;
+    }
   }
 
   async updateWithDetalles(id: number, updateRegistroLaborDto: UpdateRegistroLaborDto, detalles: any[]): Promise<any> {
-    // Actualizar el registro principal
-    const registro = await this.update(id, updateRegistroLaborDto);
+    this.logger.debug(`Actualizando registro ${id} con detalles`);
+    this.logger.debug(`Datos del registro: ${JSON.stringify(updateRegistroLaborDto)}`);
+    this.logger.debug(`Detalles recibidos: ${JSON.stringify(detalles)}`);
     
-    // Eliminar los detalles antiguos
-    await this.registrosLaborDetalleService.removeByRegistroLabor(id);
-    
-    // Si hay nuevos detalles, guardarlos
-    if (detalles && detalles.length > 0) {
-      const detallesDto = detalles.map(detalle => ({
-        registroLaborId: registro.id,
-        loteId: detalle.loteId,
-        loteNumero: detalle.loteNumero,
-        area: detalle.area,
-        areaRealizada: detalle.areaRealizada,
-        cantidad: detalle.cantidad,
-        recargo: updateRegistroLaborDto.recargo,
-        semanasEjecutadas: updateRegistroLaborDto.semanasEjecutadas
-      }));
+    try {
+      // Validar que el DTO tenga los campos requeridos
+      if (!updateRegistroLaborDto) {
+        throw new BadRequestException('El objeto de actualización es requerido');
+      }
       
-      await this.registrosLaborDetalleService.createBulk(detallesDto);
+      // Asegurar que el ID esté presente y sea correcto
+      if (!updateRegistroLaborDto.id) {
+        this.logger.debug(`El DTO no tiene ID, asignando ${id}`);
+        updateRegistroLaborDto.id = id;
+      } else if (updateRegistroLaborDto.id !== id) {
+        this.logger.warn(`ID en DTO (${updateRegistroLaborDto.id}) no coincide con ID de parámetro (${id}), ajustando`);
+        updateRegistroLaborDto.id = id;
+      }
+      
+      // Validar datos específicos
+      if (updateRegistroLaborDto.cantidad !== undefined && isNaN(Number(updateRegistroLaborDto.cantidad))) {
+        throw new BadRequestException('La cantidad debe ser un número válido');
+      }
+      
+      if (updateRegistroLaborDto.valorUnitario !== undefined && isNaN(Number(updateRegistroLaborDto.valorUnitario))) {
+        throw new BadRequestException('El valor unitario debe ser un número válido');
+      }
+      
+      // Validar detalles
+      if (!Array.isArray(detalles)) {
+        throw new BadRequestException('Los detalles deben ser un array');
+      }
+      
+      for (let i = 0; i < detalles.length; i++) {
+        const detalle = detalles[i];
+        this.logger.debug(`Validando detalle ${i}: ${JSON.stringify(detalle)}`);
+        
+        if (!detalle.loteId) {
+          throw new BadRequestException(`El detalle en posición ${i} debe tener un loteId válido`);
+        }
+        
+        if (detalle.cantidad !== undefined && isNaN(Number(detalle.cantidad))) {
+          throw new BadRequestException(`La cantidad en el detalle ${i} debe ser un número válido`);
+        }
+      }
+      
+      // Actualizar el registro principal
+      this.logger.debug('Actualizando registro principal');
+      const registro = await this.update(id, updateRegistroLaborDto);
+      
+      // Eliminar los detalles antiguos
+      this.logger.debug(`Eliminando detalles antiguos del registro: ${id}`);
+      await this.registrosLaborDetalleService.removeByRegistroLabor(id);
+      
+      // Si hay nuevos detalles, guardarlos
+      if (detalles && detalles.length > 0) {
+        this.logger.debug(`Preparando ${detalles.length} nuevos detalles para guardar`);
+        const detallesDto = detalles.map(detalle => ({
+          registroLaborId: registro.id,
+          loteId: detalle.loteId,
+          loteNumero: detalle.loteNumero,
+          area: detalle.area,
+          areaRealizada: detalle.areaRealizada,
+          cantidad: detalle.cantidad,
+          recargo: updateRegistroLaborDto.recargo,
+          semanasEjecutadas: updateRegistroLaborDto.semanasEjecutadas
+        }));
+        
+        this.logger.debug(`Detalles DTO preparados: ${JSON.stringify(detallesDto)}`);
+        await this.registrosLaborDetalleService.createBulk(detallesDto);
+      }
+      
+      this.logger.debug('Actualización completada, recuperando registro actualizado');
+      return this.findOne(registro.id);
+    } catch (error) {
+      this.logger.error(`Error en updateWithDetalles: ${error.message}`);
+      this.logger.error(error.stack);
+      throw error;
     }
-    
-    return this.findOne(registro.id);
   }
 
   async remove(id: number): Promise<void> {

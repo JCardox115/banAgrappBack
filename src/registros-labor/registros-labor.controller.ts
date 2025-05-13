@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Put, Logger } from '@nestjs/common';
 import { RegistrosLaborService } from './registros-labor.service';
 import { CreateRegistroLaborDto } from './dto/create-registro-labor.dto';
 import { UpdateRegistroLaborDto } from './dto/update-registro-labor.dto';
@@ -7,6 +7,8 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 @Controller('registros-labor')
 @UseGuards(JwtAuthGuard)
 export class RegistrosLaborController {
+  private readonly logger = new Logger(RegistrosLaborController.name);
+
   constructor(private readonly registrosLaborService: RegistrosLaborService) {}
 
   @Post()
@@ -89,6 +91,61 @@ export class RegistrosLaborController {
     @Body('registro') updateRegistroLaborDto: UpdateRegistroLaborDto,
     @Body('detalles') detalles: any[]
   ) {
+    this.logger.debug(`PATCH - Actualizando registro ${id} con detalles`);
+    this.logger.debug(`Datos del registro: ${JSON.stringify(updateRegistroLaborDto)}`);
+    this.logger.debug(`Detalles recibidos: ${JSON.stringify(detalles)}`);
+    
+    if (!updateRegistroLaborDto) {
+      this.logger.error('Error: No se recibió el objeto registro');
+      throw new Error('El objeto registro es requerido');
+    }
+    
+    // Asegurar que el id en el DTO coincida con el id del parámetro
+    if (!updateRegistroLaborDto.id) {
+      this.logger.debug(`Añadiendo ID ${id} al DTO de actualización`);
+      updateRegistroLaborDto.id = +id; // Convertir a número
+    } else if (+updateRegistroLaborDto.id !== +id) {
+      this.logger.warn(`ID en DTO (${updateRegistroLaborDto.id}) no coincide con ID de parámetro (${id})`);
+      updateRegistroLaborDto.id = +id; // Asegurar que coincida con el parámetro
+    }
+    
+    if (!detalles || !Array.isArray(detalles)) {
+      this.logger.error('Error: Detalles no es un array válido');
+      throw new Error('Los detalles deben ser un array');
+    }
+    
+    return this.registrosLaborService.updateWithDetalles(id, updateRegistroLaborDto, detalles);
+  }
+
+  @Put(':id/with-detalles')
+  updateWithDetallesPut(
+    @Param('id') id: number,
+    @Body('registro') updateRegistroLaborDto: UpdateRegistroLaborDto,
+    @Body('detalles') detalles: any[]
+  ) {
+    this.logger.debug(`PUT - Actualizando registro ${id} con detalles`);
+    this.logger.debug(`Datos del registro: ${JSON.stringify(updateRegistroLaborDto)}`);
+    this.logger.debug(`Detalles recibidos: ${JSON.stringify(detalles)}`);
+    
+    if (!updateRegistroLaborDto) {
+      this.logger.error('Error: No se recibió el objeto registro');
+      throw new Error('El objeto registro es requerido');
+    }
+    
+    // Asegurar que el id en el DTO coincida con el id del parámetro
+    if (!updateRegistroLaborDto.id) {
+      this.logger.debug(`Añadiendo ID ${id} al DTO de actualización`);
+      updateRegistroLaborDto.id = +id; // Convertir a número
+    } else if (+updateRegistroLaborDto.id !== +id) {
+      this.logger.warn(`ID en DTO (${updateRegistroLaborDto.id}) no coincide con ID de parámetro (${id})`);
+      updateRegistroLaborDto.id = +id; // Asegurar que coincida con el parámetro
+    }
+    
+    if (!detalles || !Array.isArray(detalles)) {
+      this.logger.error('Error: Detalles no es un array válido');
+      throw new Error('Los detalles deben ser un array');
+    }
+    
     return this.registrosLaborService.updateWithDetalles(id, updateRegistroLaborDto, detalles);
   }
 

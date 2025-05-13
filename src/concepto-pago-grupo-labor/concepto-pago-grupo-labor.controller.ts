@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put, Query } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ConceptoPagoGrupoLaborService } from './concepto-pago-grupo-labor.service';
 import { CreateConceptoPagoGrupoLaborDto } from './dto/create-concepto-pago-grupo-labor.dto';
@@ -32,6 +32,14 @@ export class ConceptoPagoGrupoLaborController {
   @Get('by-concepto/:idConceptoPago')
   findByConcepto(@Param('idConceptoPago') idConceptoPago: string) {
     return this.conceptoPagoGrupoLaborService.findByConceptoPago(+idConceptoPago);
+  }
+
+  @Get('by-codigo-concepto/:codigo')
+  findByCodigoConcepto(
+    @Param('codigo') codigo: string,
+    @Query('fincaId') fincaId: string
+  ) {
+    return this.conceptoPagoGrupoLaborService.findByCodigoConcepto(codigo, +fincaId);
   }
 
   @Patch(':id')
