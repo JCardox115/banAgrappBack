@@ -65,8 +65,9 @@ export class ReportesService {
       // this.logger.log(JSON.stringify(registro));
       // Si el registro tiene detalles, generar una entrada por cada detalle
       if (registro.detalles && registro.detalles.length > 0) {
-        for (const detalle of registro.detalles) {
-          registrosTransformados.push(this.transformarRegistroParaVistaPrevia(registro, detalle));
+        for (let i = 0; i < registro.detalles.length; i++) {
+          const detalle = registro.detalles[i];
+          registrosTransformados.push(this.transformarRegistroParaVistaPrevia(registro, detalle, i));
         }
       } else {
         // Si no tiene detalles, generar una sola entrada con el registro principal
@@ -126,8 +127,9 @@ export class ReportesService {
     for (const registro of registros) {
       // Si el registro tiene detalles, generar una línea para cada detalle
       if (registro.detalles && registro.detalles.length > 0) {
-        for (const detalle of registro.detalles) {
-          const lineaDetalle = this.generarLineaReporte(registro, detalle);
+        for (let i = 0; i < registro.detalles.length; i++) {
+          const detalle = registro.detalles[i];
+          const lineaDetalle = this.generarLineaReporte(registro, detalle, i);
           reportContent += `${lineaDetalle}\n`;
         }
       } else {
@@ -141,7 +143,7 @@ export class ReportesService {
   }
 
 
-  private transformarRegistroParaVistaPrevia(registro: any, detalle?: any): any {
+  private transformarRegistroParaVistaPrevia(registro: any, detalle?: any, esDetalleIndice?: number): any {
     // Formatear fecha correctamente, evitando problemas de zona horaria
     let fecha: Date;
     
@@ -196,9 +198,18 @@ export class ReportesService {
     // Calcular valor total
     const valorTotal = valorUnitario * cantidad;
     
-    // Recargo y horas
+    // Recargo
     const recargo = detalle ? this.convertirANumero(detalle.recargo) : this.convertirANumero(registro.recargo);
-    const horas = this.convertirANumero(registro.horas);
+    
+    // Horas: Aplicar la lógica según la solicitud
+    let horas = 0;
+    if (detalle) {
+      // Si tiene detalle, solo el primer registro lleva las horas
+      horas = esDetalleIndice === 0 ? this.convertirANumero(registro.horas) : 0;
+    } else {
+      // Si no tiene detalle, siempre lleva las horas del encabezado
+      horas = this.convertirANumero(registro.horas);
+    }
     
     return {
       // Añadir los IDs para actualizar los registros posteriormente
@@ -239,7 +250,7 @@ export class ReportesService {
 
 
 
-  private generarLineaReporte(registro: RegistroLabor, detalle?: RegistroLaborDetalle): string {
+  private generarLineaReporte(registro: RegistroLabor, detalle?: RegistroLaborDetalle, esDetalleIndice?: number): string {
     // Formatear fecha a DD/MM/YYYY correctamente, evitando problemas de zona horaria
     // Obtenemos los componentes de la fecha directamente para evitar conversiones inesperadas
     let fecha: Date;
@@ -291,8 +302,15 @@ export class ReportesService {
     const codigoFinca = registro.empleado.finca?.codigo || '';
     const codigoCentroCosto = registro.centroCosto?.codigo || '';
     
-    // Horas trabajadas
-    const horas = registro.horas?.toString() || '0.00';
+    // Horas trabajadas - Aplicar la lógica según la solicitud
+    let horas = '0.00';
+    if (detalle) {
+      // Si tiene detalle, solo el primer registro lleva las horas
+      horas = esDetalleIndice === 0 ? registro.horas?.toString() || '0.00' : '0.00';
+    } else {
+      // Si no tiene detalle, siempre lleva las horas del encabezado
+      horas = registro.horas?.toString() || '0.00';
+    }
     
     // Semanas ejecutadas - AHORA EXTRAYENDO DEL DETALLE SI EXISTE
     const semanas = detalle?.semanasEjecutadas?.toString() || registro.semanasEjecutadas?.toString() || '0';

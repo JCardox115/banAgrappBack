@@ -1,3 +1,124 @@
+# Sistema de Gestión de Labores Agrícolas - Backend
+
+Backend para el sistema de gestión de nómina y labores agrícolas.
+
+## Requisitos
+
+- Node.js (v14 o superior)
+- PostgreSQL (v12 o superior)
+- NPM (v7 o superior)
+
+## Entornos disponibles
+
+El sistema puede ejecutarse en tres entornos diferentes:
+
+1. **Desarrollo (development)** - Para desarrollo local
+2. **UAT (User Acceptance Testing)** - Para pruebas de aceptación
+3. **Producción (production)** - Para el entorno de producción
+
+## Configuración de entorno
+
+La aplicación utiliza diferentes archivos de configuración según el ambiente. Para cada entorno, debes crear el archivo correspondiente:
+
+- `.env` - Variables comunes para todos los entornos
+- `.env.development` - Variables específicas de desarrollo (cuando NODE_ENV=development)
+- `.env.uat` - Variables específicas de UAT (cuando NODE_ENV=uat)
+- `.env.production` - Variables específicas de producción (cuando NODE_ENV=production)
+- `.env.local` - Variables locales que no se deben compartir en control de versiones
+
+Ejemplo de contenido para los archivos `.env`:
+
+```
+# Base de datos
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=tu_contraseña
+DB_DATABASE=nombre_base_datos
+
+# JWT
+JWT_SECRET=clave_secreta_muy_segura
+JWT_EXPIRES_IN=1d
+
+# Aplicación
+PORT=3000
+API_PREFIX=api
+CORS_ORIGIN=http://localhost:4200
+
+# Otros
+NODE_ENV=development  # Ajustar según el archivo específico
+```
+
+Para **producción**, asegúrate de usar valores seguros:
+
+```
+# En .env.production
+DB_DATABASE=bananera_prod
+JWT_SECRET=clave_muy_segura_y_compleja_para_produccion
+CORS_ORIGIN=https://tu-dominio-produccion.com
+NODE_ENV=production
+```
+
+## Instalación
+
+```bash
+# Instalar dependencias
+npm install
+```
+
+## Scripts disponibles
+
+### Desarrollo
+
+```bash
+# Ejecutar en modo desarrollo (con recarga automática)
+npm run start:dev
+
+# Ejecutar en modo debug
+npm run start:debug
+```
+
+### UAT
+
+```bash
+# Compilar para UAT
+npm run build
+
+# Ejecutar en entorno UAT
+npm run start:uat
+
+# Desplegar en UAT (compilar y ejecutar)
+npm run deploy:uat
+```
+
+### Producción
+
+```bash
+# Compilar para producción (optimizado)
+npm run build:prod
+
+# Ejecutar en modo producción
+npm run start:prod
+
+# Desplegar en producción (compilar y ejecutar)
+npm run deploy:prod
+```
+
+## Seguridad y configuraciones adicionales
+
+En los entornos de UAT y producción, se activan automáticamente:
+
+1. **Helmet** - Protección para cabeceras HTTP
+2. **Compression** - Compresión de respuestas
+3. **Rate Limiting** - Límite de solicitudes por IP
+4. **Logging reducido** - Solo logs esenciales
+
+## Bases de datos recomendadas por entorno
+
+- **Desarrollo**: `bananera_dev`
+- **UAT**: `bananera_uat`
+- **Producción**: `bananera_prod`
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>

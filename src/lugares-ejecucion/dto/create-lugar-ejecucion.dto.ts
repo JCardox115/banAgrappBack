@@ -8,4 +8,7 @@ export class CreateLugarEjecucionDto {
   @IsNotEmpty()
   @IsString()
   descripcion: string;
+
+  @IsNotEmpty()
+  activo: boolean;
 } 

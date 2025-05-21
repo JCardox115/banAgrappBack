@@ -24,12 +24,25 @@ import { ConceptoPagoGrupoLaborModule } from './concepto-pago-grupo-labor/concep
 import { UserFincaModule } from './user-finca/user-finca.module';
 import { ImportacionesModule } from './importaciones/importaciones.module';
 import { RegistrosLaborDetalleModule } from './registros-labor-detalle/registros-labor-detalle.module';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// Determinar el entorno actual
+const nodeEnv = process.env.NODE_ENV || 'development';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: [
+        `.env.${nodeEnv}.local`, 
+        `.env.${nodeEnv}`, 
+        '.env.local', 
+        '.env'
+      ],
+      // Imprimir variables cargadas en consola (solo nombres, no valores por seguridad)
+      expandVariables: true, // Permitir expansión de variables
+      cache: false, // No cachear en desarrollo
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -73,6 +86,35 @@ import { RegistrosLaborDetalleModule } from './registros-labor-detalle/registros
   controllers: [CorsController, TestController],
 })
 export class AppModule implements NestModule {
+  constructor(private configService: ConfigService) {
+    // Imprimir las variables de entorno cargadas (solo el nombre de las que existen)
+    console.log('Variables de entorno cargadas:');
+    const envVars = ['NODE_ENV', 'JWT_SECRET', 'DB_HOST', 'DB_PORT', 'CORS_ORIGIN'];
+    
+    envVars.forEach(varName => {
+      const value = this.configService.get(varName);
+      if (value !== undefined) {
+        if (varName === 'JWT_SECRET') {
+          console.log(`  - ${varName}: [VALOR_SECRETO_CONFIGURADO]`);
+        } else {
+          console.log(`  - ${varName}: ${value}`);
+        }
+      } else {
+        console.log(`  - ${varName}: [NO CONFIGURADO]`);
+      }
+    });
+
+    // Verificar archivos .env encontrados
+    const envFilePaths = [
+      '.env',
+      '.env.local',
+      `.env.${nodeEnv}`,
+      `.env.${nodeEnv}.local`,
+    ].filter(fileName => fs.existsSync(path.join(process.cwd(), fileName)));
+    
+    console.log('Archivos .env encontrados:', envFilePaths);
+  }
+
   configure(consumer: MiddlewareConsumer) {
     // Aplicar el middleware CORS a todas las rutas
     consumer.apply(CorsMiddleware).forRoutes('*');
